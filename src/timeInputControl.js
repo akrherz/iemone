@@ -1,6 +1,8 @@
 import { updateRadarTMSLayer } from './radarTMSLayer';
-import { getCurrentTime, subscribeToCurrentTime, setCurrentTime } from './stateManager';
-import { subscribeToRealTime, getIsRealTime, setIsRealTime } from './stateManager';
+import {
+    getCurrentTime, subscribeToCurrentTime, setCurrentTime,
+    subscribeToRealTime, getIsRealTime, setIsRealTime
+} from './stateManager';
 import { rectifyToFiveMinutes } from './utils';
 
 let timeInput = null;
@@ -100,7 +102,7 @@ function stepTime(minutes) {
 }
 
 function toggleRealTimeMode() {
-    setIsRealTime(! getIsRealTime());
+    setIsRealTime(!getIsRealTime());
 }
 
 function updateUI() {
@@ -111,7 +113,7 @@ function updateUI() {
     const timeStepForwardButton = document.getElementById('time-step-forward');
     const timePlayPauseButton = document.getElementById('time-play-pause');
 
-    if (! isRealTime) {
+    if (!isRealTime) {
         clearInterval(realTimeInterval);
         realTimeInterval = null;
         realtimeModeButton.textContent = '⏱';
