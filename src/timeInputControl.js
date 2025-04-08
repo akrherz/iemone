@@ -108,7 +108,6 @@ function toggleRealTimeMode() {
 function updateUI() {
     const isRealTime = getIsRealTime();
     const realtimeModeButton = document.getElementById('realtime-mode');
-    const timeInput = document.getElementById('current-time');
     const timeStepBackwardButton = document.getElementById('time-step-backward');
     const timeStepForwardButton = document.getElementById('time-step-forward');
     const timePlayPauseButton = document.getElementById('time-play-pause');
