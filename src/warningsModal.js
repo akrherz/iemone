@@ -4,6 +4,7 @@ export function setupWarningsModal() {
     const warningsModalContent = document.getElementById('warnings-modal-content');
     const closeWarningsButton = document.getElementById('close-warnings');
     const collapseWarningsButton = document.getElementById('collapse-warnings');
+    const searchInput = document.getElementById('warnings-search');
 
     if (warningsToggle && warningsModal) {
         // Toggle warnings modal visibility
@@ -34,33 +35,36 @@ export function setupWarningsModal() {
     let offsetX = 0;
     let offsetY = 0;
 
-    warningsModalContent.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        offsetX = e.clientX - warningsModal.offsetLeft;
-        offsetY = e.clientY - warningsModal.offsetTop;
-        warningsModal.style.transition = 'none'; // Disable transition during drag
-    });
+    if (warningsModalContent) {
+        warningsModalContent.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            offsetX = e.clientX - warningsModal.offsetLeft;
+            offsetY = e.clientY - warningsModal.offsetTop;
+            warningsModal.style.transition = 'none'; // Disable transition during drag
+        });
 
-    document.addEventListener('mousemove', (e) => {
-        if (isDragging) {
-            warningsModal.style.left = `${e.clientX - offsetX}px`;
-            warningsModal.style.top = `${e.clientY - offsetY}px`;
-        }
-    });
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                warningsModal.style.left = `${e.clientX - offsetX}px`;
+                warningsModal.style.top = `${e.clientY - offsetY}px`;
+            }
+        });
 
-    document.addEventListener('mouseup', () => {
-        isDragging = false;
-        warningsModal.style.transition = ''; // Re-enable transition
-    });
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            warningsModal.style.transition = ''; // Re-enable transition
+        });
+    }
 
     // Add search functionality for warnings table
-    const searchInput = document.getElementById('warnings-search');
-    searchInput.addEventListener('input', (event) => {
-        const filter = event.target.value.toLowerCase();
-        const rows = document.querySelectorAll('#warnings-table tbody tr');
-        rows.forEach((row) => {
-            const text = row.textContent.toLowerCase();
-            row.style.display = text.includes(filter) ? '' : 'none';
+    if (searchInput) {
+        searchInput.addEventListener('input', (event) => {
+            const filter = event.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#warnings-table tbody tr');
+            rows.forEach((row) => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
         });
-    });
+    }
 }

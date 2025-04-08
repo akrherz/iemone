@@ -4,7 +4,13 @@ import VectorSource from 'ol/source/Vector';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Stroke, Style } from 'ol/style';
 
-export function createWarningsLayer(map, tableElement, currentTime) { // Updated function name
+import { showToaster } from './toaster';
+import { formatTimestampToUTC } from './utils';
+import { subscribeToCurrentTime, getCurrentTime } from './stateManager';
+
+let warningsLayer = null;
+
+export function createWarningsLayer(map, tableElement) {
     const colorLookup = {
         "FL.A": "#2E8B57",
         "MA.W": "#FFA500",
@@ -25,10 +31,10 @@ export function createWarningsLayer(map, tableElement, currentTime) { // Updated
 
     const geojsonSource = new VectorSource({
         format: new GeoJSON(),
-        url: () => `/geojson/sbw.py?ts=${currentTime.toISOString()}`,
+        url: () => `/geojson/sbw.py?ts=${formatTimestampToUTC(getCurrentTime())}`,
     });
 
-    const warningsLayer = new VectorLayer({ // Updated variable name
+    warningsLayer = new VectorLayer({
         source: geojsonSource,
         style: (feature) => {
             const phenomena = feature.get('phenomena');
@@ -185,5 +191,21 @@ export function createWarningsLayer(map, tableElement, currentTime) { // Updated
         });
     });
 
+    subscribeToCurrentTime((newTime) => {
+        updateWarningsLayer(newTime);
+    });
+
     return warningsLayer;
+}
+
+export function getWarningsLayer() {
+    return warningsLayer;
+}
+
+export function updateWarningsLayer(time) {
+    if (warningsLayer) {
+        const timestamp = formatTimestampToUTC(time);
+        showToaster(`Warnings for ${timestamp} loaded!`);
+        warningsLayer.getSource().setUrl(`/geojson/sbw.py?ts=${timestamp}`);
+    }
 }
