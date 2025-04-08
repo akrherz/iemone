@@ -1,7 +1,6 @@
 import { fromLonLat, toLonLat } from 'ol/proj';
 import { formatTimestampToUTC } from './utils';
-import { subscribeToCurrentTime, setCurrentTime } from './stateManager';
-import { subscribeToRealTime, setIsRealTime } from './stateManager';
+import { subscribeToCurrentTime, setCurrentTime, subscribeToRealTime, setIsRealTime } from './stateManager';
 
 export function getQueryParams() {
     const queryParams = new URLSearchParams(window.location.search);

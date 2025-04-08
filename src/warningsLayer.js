@@ -48,7 +48,7 @@ export function createWarningsLayer(map, tableElement) {
             const color = colorLookup[key] || 'gray';
             return new Style({
                 stroke: new Stroke({
-                    color: color,
+                    color,
                     width: 3
                 })
             });
