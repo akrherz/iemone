@@ -55,8 +55,9 @@ export function initializeURLHandler(map) {
     } else {
         setIsRealTime(true);
     }
-    if (queryParams.center) {
-        const [lon, lat] = queryParams.center.split(',').map(Number);
+    if (queryParams.lon && queryParams.lat) {
+        const lon = parseFloat(queryParams.lon);
+        const lat = parseFloat(queryParams.lat);
         map.getView().setCenter(fromLonLat([lon, lat]));
     }
     if (queryParams.zoom) {

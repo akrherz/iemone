@@ -10,6 +10,17 @@ import { subscribeToCurrentTime, getCurrentTime } from './stateManager';
 
 let warningsLayer = null;
 
+/**
+ * Get the url for the warnings GeoJSON based on the time.
+ * @param {*} time
+ * @returns {string} The URL for the warnings GeoJSON.
+ */
+function getWarningURL(time) {
+    const timestamp = time.toISOString();
+    return `https://mesonet.agron.iastate.edu/geojson/sbw.py?ts=${timestamp}`;
+
+}
+
 export function createWarningsLayer(map, tableElement) {
     const colorLookup = {
         "FL.A": "#2E8B57",
@@ -31,7 +42,7 @@ export function createWarningsLayer(map, tableElement) {
 
     const geojsonSource = new VectorSource({
         format: new GeoJSON(),
-        url: () => `/geojson/sbw.py?ts=${formatTimestampToUTC(getCurrentTime())}`,
+        url: () => getWarningURL(getCurrentTime())
     });
 
     warningsLayer = new VectorLayer({
@@ -205,7 +216,7 @@ export function getWarningsLayer() {
 export function updateWarningsLayer(time) {
     if (warningsLayer) {
         const timestamp = formatTimestampToUTC(time);
-        showToaster(`Warnings for ${timestamp} loaded!`);
-        warningsLayer.getSource().setUrl(`/geojson/sbw.py?ts=${timestamp}`);
+        showToaster(`Warnings for ${timestamp} loading!`);
+        warningsLayer.getSource().setUrl(getWarningURL(time));
     }
 }
