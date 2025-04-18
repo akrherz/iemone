@@ -13,6 +13,5 @@ export function rectifyToFiveMinutes(date) {
     const rectifiedMinutes = Math.floor(minutes / 5) * 5;
     rectifiedDate.setUTCMinutes(rectifiedMinutes);
     rectifiedDate.setUTCSeconds(0);
-    console.error(`retifyToFiveMinutes called... date: ${date}, rectifiedDate: ${rectifiedDate}`);
     return rectifiedDate;
 }
