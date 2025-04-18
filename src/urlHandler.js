@@ -1,4 +1,4 @@
-import { fromLonLat, get, toLonLat } from 'ol/proj';
+import { fromLonLat, toLonLat } from 'ol/proj';
 import { formatTimestampToUTC } from './utils';
 import { subscribeToCurrentTime, setCurrentTime, subscribeToRealTime, setIsRealTime, getIsRealTime } from './stateManager';
 
