@@ -1,6 +1,6 @@
 import { fromLonLat, toLonLat } from 'ol/proj';
 import { formatTimestampToUTC } from './utils';
-import { subscribeToCurrentTime, setCurrentTime, subscribeToRealTime, setIsRealTime } from './stateManager';
+import { subscribeToCurrentTime, setCurrentTime, subscribeToRealTime, setIsRealTime, getIsRealTime } from './stateManager';
 
 export function getQueryParams() {
     const queryParams = new URLSearchParams(window.location.search);
@@ -29,8 +29,10 @@ export function initializeURLHandler(map) {
     });
 
     subscribeToCurrentTime((currentTime) => {
-        const timestamp = formatTimestampToUTC(currentTime);
-        updateQueryParams('timestamp', timestamp);
+        if (!getIsRealTime()) {
+            const timestamp = formatTimestampToUTC(currentTime);
+            updateQueryParams('timestamp', timestamp);
+        }
     });
     subscribeToRealTime((isRealTime) => {
         if (isRealTime) {

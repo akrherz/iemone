@@ -22,6 +22,7 @@ function handleTimeInputChange(event) {
 
 function toggleAnimation() {
     let progressBar = document.querySelector('#animation-progress .progress');
+    const timePlayPauseButton = document.getElementById('time-play-pause');
 
     if (!progressBar) {
         const progressContainer = document.getElementById('animation-progress');
@@ -33,32 +34,38 @@ function toggleAnimation() {
     if (animationInterval) {
         clearInterval(animationInterval);
         animationInterval = null;
-        timePlayPauseButton.textContent = '⏯';
+        if (timePlayPauseButton) {
+            timePlayPauseButton.textContent = '⏯';
+        }
         progressBar.style.width = '0%';
         return;
     }
 
-    const endTime = rectifyToFiveMinutes(getCurrentTime());
-    const now = new Date();
+    let endTime = rectifyToFiveMinutes(getCurrentTime());
+    let now = new Date();
     now.setMinutes(endTime.getMinutes() - 55);
     let step = 0;
     const totalSteps = 12;
 
     animationInterval = setInterval(() => {
         if (step >= totalSteps) {
+            if (getIsRealTime()){
+                // Update the end timestamp
+                endTime = rectifyToFiveMinutes(getCurrentTime());
+            }
             step = 0;
             now = new Date(endTime.getTime() - 55 * 60 * 1000);
-        } else {
-            now.setMinutes(now.getMinutes() + 5);
-            updateRadarTMSLayer(now);
-            step++;
         }
-
+        updateRadarTMSLayer(now);
+        now.setMinutes(now.getMinutes() + 5);
+        step++;
         const progressPercentage = (step / totalSteps) * 100;
         progressBar.style.width = `${progressPercentage}%`;
     }, 1000);
 
-    timePlayPauseButton.textContent = '⏸';
+    if (timePlayPauseButton) {
+        timePlayPauseButton.textContent = '⏸';
+    }
 }
 
 export function setupTimeInputControl() {
@@ -132,6 +139,8 @@ function updateUI() {
 
     realTimeInterval = setInterval(() => {
         const lnow = new Date();
+        lnow.setSeconds(0);
+        lnow.setMilliseconds(0);
         setCurrentTime(lnow);
     }, 60000);
 
