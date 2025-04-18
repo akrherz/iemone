@@ -217,6 +217,8 @@ export function updateWarningsLayer(time) {
     if (warningsLayer) {
         const timestamp = formatTimestampToUTC(time);
         showToaster(`Warnings for ${timestamp} loading!`);
-        warningsLayer.getSource().setUrl(getWarningURL(time));
+        const source = warningsLayer.getSource();
+        source.setUrl(getWarningURL(time));
+        source.refresh();
     }
 }
