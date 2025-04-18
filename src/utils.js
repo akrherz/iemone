@@ -1,4 +1,3 @@
-
 export function formatTimestampToUTC(date) {
     const year = date.getUTCFullYear();
     const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
@@ -9,9 +8,11 @@ export function formatTimestampToUTC(date) {
 }
 
 export function rectifyToFiveMinutes(date) {
-    const minutes = date.getUTCMinutes();
+    const rectifiedDate = new Date(date.getTime());
+    const minutes = rectifiedDate.getUTCMinutes();
     const rectifiedMinutes = Math.floor(minutes / 5) * 5;
-    date.setUTCMinutes(rectifiedMinutes);
-    date.setUTCSeconds(0);
-    return date;
+    rectifiedDate.setUTCMinutes(rectifiedMinutes);
+    rectifiedDate.setUTCSeconds(0);
+    console.error(`retifyToFiveMinutes called... date: ${date}, rectifiedDate: ${rectifiedDate}`);
+    return rectifiedDate;
 }
