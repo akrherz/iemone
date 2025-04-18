@@ -26,7 +26,6 @@ export function getState(key) {
  */
 export function setState(key, value) {
     if (!key) {
-        console.error('Invalid key provided to setState.');
         return;
     }
     state[key] = value;

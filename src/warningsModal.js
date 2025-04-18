@@ -26,8 +26,6 @@ export function setupWarningsModal() {
                 warningsModal.classList.remove('open');
             });
         }
-    } else {
-        console.error('Warnings toggle or warnings modal element not found.');
     }
 
     // Make modal draggable

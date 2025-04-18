@@ -30,7 +30,6 @@ export function updateRadarTMSLayer(time) {
         const new_url = `${SERVICE}ridge::USCOMP-N0Q-${timestamp}/{z}/{x}/{y}.png`;
         const current_url = radarTMSLayer.getSource().getUrls()[0];
         if (current_url !== new_url) {
-            console.log(`Updating radar TMS layer URL from ${current_url} to ${new_url}`);
             radarTMSLayer.getSource().setUrl(new_url);
         }
     }
