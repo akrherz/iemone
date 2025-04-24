@@ -17,48 +17,95 @@
 </head>
 <div id="map" class="map"></div>
 <div id="branding-overlay" data-mode="archive">IEM1: Archive</div>
-<button id="warnings-toggle">☰ Warnings</button>
+
+<div class="control-toggle-group">
+    <button class="control-toggle-button" id="layers-toggle" title="Toggle Layer Controls">☰</button>
+    <button class="control-toggle-button" id="warnings-toggle" title="Toggle Warnings">⚠</button>
+    <button class="control-toggle-button" id="exit-button" title="Return to Home"
+    onclick="window.location.href='/'">⌂</button>
+</div>
+
 <div id="time-control" class="time-control">
     <div class="time-input-container">
         <input type="datetime-local" id="current-time" class="time-input">
     </div>
     <div class="time-buttons">
         <button id="time-step-backward">◀</button>
-        <button id="time-play-pause">⏯</button>
+        <button id="time-play-pause">▶</button>
         <button id="time-step-forward">▶</button>
         <button id="realtime-mode">⏱</button>
     </div>
     <div id="animation-progress" class="progress-bar"></div>
 </div>
 <div id="layer-control" class="side-drawer">
-    <button id="layers-toggle">☰ Layers</button>
+    <button class="control-close-button" id="close-layers" title="Close Layer Controls">✖</button>
     <div class="drawer-content">
-        <h3>Layers</h3>
-        <label>
-            <input type="checkbox" id="toggle-tms-layer" checked>
-            Radar Layer
-        </label>
-        <label>
-            Opacity: <input type="range" id="tms-opacity-slider" min="0" max="1" step="0.1" value="1">
-        </label>
-        <label>
-            <input type="checkbox" id="toggle-warnings-layer" checked>
-            Warnings &amp; Advisories
-        </label>
-        <div id="warnings-toggles" class="phenomena-toggles">
-            <button class="phenomena-toggle active" data-key="TO.W" title="Tornado Warning" style="background: #FF0000;">TO.W</button>
-            <button class="phenomena-toggle active" data-key="SV.W" title="Severe Thunderstorm Warning" style="background: #FFA500;">SV.W</button>
-            <button class="phenomena-toggle active" data-key="FF.W" title="Flash Flood Warning" style="background: #8B0000;">FF.W</button>
-            <button class="phenomena-toggle active" data-key="FL.W" title="Flood Warning" style="background: #00FF00;">FL.W</button>
-            <button class="phenomena-toggle active" data-key="FL.A" title="Flood Watch" style="background: #2E8B57;">FL.A</button>
-            <button class="phenomena-toggle active" data-key="FL.Y" title="Flood Advisory" style="background: #00FF7F;">FL.Y</button>
-            <button class="phenomena-toggle active" data-key="DS.W" title="Dust Storm Warning" style="background: #FFE4C4;">DS.W</button>
-            <button class="phenomena-toggle active" data-key="DS.Y" title="Dust Storm Advisory" style="background: #BDB76B;">DS.Y</button>
-            <button class="phenomena-toggle active" data-key="SQ.W" title="Squall Warning" style="background: #C71585;">SQ.W</button>
-            <button class="phenomena-toggle active" data-key="FA.W" title="Areal Flood Warning" style="background: #00FF00;">FA.W</button>
-            <button class="phenomena-toggle active" data-key="FA.A" title="Areal Flood Watch" style="background: #2E8B57;">FA.A</button>
-            <button class="phenomena-toggle active" data-key="FA.Y" title="Areal Flood Advisory" style="background: #00FF7F;">FA.Y</button>
-            <button class="phenomena-toggle active" data-key="MA.W" title="Marine Warning" style="background: #FFA500;">MA.W</button>
+        <h3>Map Layers</h3>
+        <div class="layer-section">
+            <label class="layer-toggle">
+                <input type="checkbox" id="toggle-tms-layer" checked>
+                <span>Radar Layer</span>
+            </label>
+            <div class="layer-options">
+                <label>
+                    Opacity: <input type="range" id="tms-opacity-slider" min="0" max="1" step="0.1" value="1">
+                </label>
+            </div>
+        </div>
+        <div class="layer-section">
+            <label class="layer-toggle">
+                <input type="checkbox" id="toggle-warnings-layer" checked>
+                <span>Warnings & Advisories</span>
+            </label>
+        </div>
+
+        <div class="phenomena-toggles">
+            <div class="phenomena-group">Warnings</div>
+            <button class="phenomena-toggle" data-key="TO.W">
+                Tornado
+                <span class="count"></span>
+            </button>
+            <button class="phenomena-toggle" data-key="SV.W">
+                Severe T-storm
+                <span class="count"></span>
+            </button>
+            <button class="phenomena-toggle" data-key="FF.W">
+                Flash Flood
+                <span class="count"></span>
+            </button>
+            <button class="phenomena-toggle" data-key="FL.W">
+                Flood
+                <span class="count"></span>
+            </button>
+            <button class="phenomena-toggle" data-key="MA.W">
+                Marine
+                <span class="count"></span>
+            </button>
+            <button class="phenomena-toggle" data-key="DS.W">
+                Dust Storm
+                <span class="count"></span>
+            </button>
+            <button class="phenomena-toggle" data-key="SQ.W">
+                Snow Squall
+                <span class="count"></span>
+            </button>
+            <button class="phenomena-toggle" data-key="EW.W">
+                Extreme Wind
+                <span class="count"></span>
+            </button>
+            <div class="phenomena-group">Advisories</div>
+            <button class="phenomena-toggle" data-key="FL.Y">
+                Flood
+                <span class="count"></span>
+            </button>
+            <button class="phenomena-toggle" data-key="FA.Y">
+                Areal Flood
+                <span class="count"></span>
+            </button>
+            <button class="phenomena-toggle" data-key="DS.Y">
+                Dust Storm
+                <span class="count"></span>
+            </button>
         </div>
     </div>
 </div>

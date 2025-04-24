@@ -35,7 +35,7 @@ function toggleAnimation() {
         clearInterval(animationInterval);
         animationInterval = null;
         if (timePlayPauseButton) {
-            timePlayPauseButton.textContent = '⏯';
+            timePlayPauseButton.textContent = '▶';
         }
         progressBar.style.width = '0%';
         return;

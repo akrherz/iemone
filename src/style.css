@@ -10,6 +10,7 @@ html, body {
 #map {
     width: 100%;
     height: 100%;
+    z-index: 1;
 }
 
 #time-control {
@@ -22,6 +23,7 @@ html, body {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     font-family: Arial, sans-serif;
     font-size: 14px;
+    z-index: 1002;
 }
 
 #time-control .time-buttons {
@@ -94,23 +96,22 @@ html, body {
 }
 
 #layer-control {
-    position: absolute;
-    top: 50px; /* Adjusted to align with layers-toggle */
-    right: 10px;
-    width: 250px;
-    max-width: 80%;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    z-index: 1000;
-    transform: translateX(100%); /* Start hidden off-screen */
-    transition: transform 0.3s ease-in-out;
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 1004; /* Increased to be above control buttons */
+    display: flex;
+    flex-direction: column;
 }
 
 #layer-control.open {
-    transform: translateX(0); /* Slide into view when open */
+    transform: translateX(0);
 }
 
 #layer-toggle {
@@ -130,64 +131,10 @@ html, body {
     background: #0056b3;
 }
 
-#layers-toggle {
-    position: absolute;
-    top: 10px; /* Align inside layer-control */
-    left: -80px; /* Position toggle button outside the drawer */
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 3px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-#layers-toggle:hover {
-    background: #0056b3;
-}
-
-.drawer-content {
-    padding: 10px;
-}
-
-.drawer-content h3 {
-    margin: 0 0 10px;
-    font-size: 16px;
-    font-weight: bold;
-}
-
-.drawer-content label {
-    display: block;
-    margin-bottom: 5px;
-}
-
-.time-input-container {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-#current-time {
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    width: 180px;
-}
-
-#current-time:disabled {
-    background-color: #f0f0f0; /* Light gray background */
-    color: #999999; /* Gray text */
-    cursor: not-allowed; /* Show not-allowed cursor */
-    border: 1px solid #cccccc; /* Light gray border */
-}
-
 #warnings-control {
     position: absolute;
-    top: 10px; /* Align with branding overlay */
-    right: 10px; /* Slide in from the right */
+    top: 10px;
+    right: 10px;
     width: 300px;
     max-width: 90%;
     background: rgba(255, 255, 255, 0.9);
@@ -204,96 +151,100 @@ html, body {
     transform: translateX(0); /* Slide into view when open */
 }
 
-#warnings-toggle {
-    position: absolute;
-    top: 10px; /* Align with branding overlay */
-    right: 10px; /* Position near the right edge */
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 3px;
-    cursor: pointer;
-    font-size: 16px;
-    z-index: 1001; /* Ensure it appears above other elements */
-}
-
-#warnings-toggle:hover {
-    background: #0056b3;
-}
-
 #warnings-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 10px;
+    table-layout: fixed;
 }
 
-#warnings-table th, #warnings-table td {
-    border: 1px solid #ccc;
-    padding: 5px;
+#warnings-table th, 
+#warnings-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
     text-align: left;
+    word-wrap: break-word;
 }
 
 #warnings-table th {
     background: #f4f4f4;
     font-weight: bold;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+#warnings-table th:nth-child(1) { width: 15%; }
+#warnings-table th:nth-child(2) { width: 30%; }
+#warnings-table th:nth-child(3) { width: 55%; }
+
+#warnings-search {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    font-size: 14px;
 }
 
 /* Modal window for desktop */
 #warnings-modal {
     position: fixed;
-    top: 20%;
+    top: 50%;
     left: 50%;
-    transform: translate(-50%, -20%);
+    transform: translate(-50%, -50%) scale(0.95);
+    opacity: 0;
     width: 600px;
-    max-width: 90%;
-    background: rgba(255, 255, 255, 0.95);
+    max-width: 90vw;
+    max-height: 80vh;
+    background: rgba(255, 255, 255, 0.98);
     border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     z-index: 2000;
-    display: none; /* Hidden by default */
+    visibility: hidden;
+    transition: all 0.3s ease;
+    display: flex;
     flex-direction: column;
-    resize: both;
-    overflow: auto;
 }
 
 #warnings-modal.open {
-    display: flex; /* Show modal when open */
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    visibility: visible;
 }
 
 #warnings-modal-header {
     background: #007bff;
     color: white;
-    padding: 10px;
+    padding: 15px;
     font-size: 16px;
     font-weight: bold;
-    cursor: move; /* Indicate draggable */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: sticky; /* Make the header sticky */
-    top: 0; /* Stick to the top of the modal */
-    z-index: 1; /* Ensure it stays above the content */
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    border-radius: 8px 8px 0 0;
 }
 
-/* Ensure the close button is always visible */
 #warnings-modal-header button {
     background: transparent;
     border: none;
     color: white;
-    font-size: 16px;
+    font-size: 20px;
     cursor: pointer;
-    z-index: 2; /* Ensure it stays above other elements */
+    padding: 0 8px;
+    line-height: 1;
 }
 
 #warnings-modal-content {
-    padding: 10px;
-    overflow-y: auto; /* Enable vertical scrolling */
-    max-height: calc(100vh - 100px); /* Ensure it fits within the viewport */
-    display: block; /* Ensure content is visible */
+    padding: 15px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
 }
 
-/* Full-screen overlay for mobile */
 @media (max-width: 768px) {
     #warnings-modal {
         position: fixed;
@@ -304,6 +255,7 @@ html, body {
         height: 100%;
         border-radius: 0;
         display: none; /* Hidden by default */
+        z-index: 2000;
     }
 
     #warnings-modal.open {
@@ -331,41 +283,203 @@ html, body {
     #collapse-warnings:hover {
         background: #0056b3;
     }
+
+    #warnings-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        transform: none;
+        border-radius: 0;
+        margin: 0;
+    }
+
+    #warnings-modal.open {
+        transform: none;
+    }
+
+    #warnings-modal-header {
+        padding: 12px 15px;
+        border-radius: 0;
+    }
+
+    #warnings-modal-content {
+        padding: 10px;
+        height: calc(100% - 50px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #warnings-table {
+        font-size: 14px;
+    }
+
+    #warnings-table th:nth-child(1) { width: 20%; }
+    #warnings-table th:nth-child(2) { width: 35%; }
+    #warnings-table th:nth-child(3) { width: 45%; }
+
+    #warnings-table th,
+    #warnings-table td {
+        padding: 6px;
+    }
+
+    .control-toggle-group {
+        position: fixed;
+        top: auto;
+        bottom: 90px;  /* Position above time controls */
+        right: 10px;
+        flex-direction: column;
+        gap: 8px;
+        z-index: 1003;
+    }
+
+    .control-toggle-button {
+        width: 44px;
+        height: 44px;
+        font-size: 18px;
+        opacity: 0.9;
+        display: flex !important; /* Force display */
+        background: rgba(0, 123, 255, 0.95);
+        pointer-events: auto !important; /* Ensure clickable */
+        z-index: 1003;
+    }
+
+    .control-toggle-button:active {
+        transform: scale(0.95);
+    }
+
+    .drawer-content {
+        padding: 15px;
+    }
+
+    .phenomena-toggles {
+        gap: 10px;
+    }
+
+    .phenomena-toggle {
+        padding: 8px 14px;
+        min-width: 100px;
+    }
+
+    #time-control {
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 400px;
+        padding: 15px;
+        bottom: 10px;
+        z-index: 1002;
+    }
+
+    #warnings-modal {
+        width: 100%;
+        height: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+    }
 }
 
 .phenomena-toggles {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 8px;
     margin-top: 10px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow-y: visible; /* Allow toggles to overflow for badge visibility */
+}
+
+/* Group headers */
+.phenomena-group {
+    width: 100%;
+    padding: 5px 0;
+    margin: 5px 0;
+    font-weight: bold;
+    font-size: 13px;
+    color: #444;
+    border-bottom: 1px solid #ddd;
 }
 
 .phenomena-toggle {
-    background: #007bff;
-    color: #ffffff; /* High contrast white text */
-    border: none;
-    padding: 2px 5px; /* Reduced padding for better text fit */
-    border-radius: 3px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: 500;
     text-align: center;
-    width: auto; /* Allow buttons to resize based on content */
-    min-width: 50px; /* Ensure a minimum width for consistency */
-}
-
-.phenomena-toggle.active {
-    background: #0056b3;
-    color: #ffffff; /* High contrast white text for active state */
-}
-
-.phenomena-toggle:not(.active) {
-    background: #e0e0e0; /* Light gray background for untoggled */
-    color: #333333; /* Dark gray text for untoggled */
+    min-width: 80px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    /* Keep existing background colors from NWS standards */
 }
 
 .phenomena-toggle:hover {
-    background: #0056b3;
-    color: #ffffff; /* Ensure hover state is consistent */
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.phenomena-toggle:active {
+    transform: translateY(0);
+}
+
+/* Count badge */
+.phenomena-toggle .count {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #333;
+    border-radius: 10px;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: bold;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    display: block; /* Always show the badge container */
+    min-width: 16px; /* Ensure consistent width for single digits */
+}
+
+.phenomena-toggle .count:empty {
+    display: none; /* Hide only if there's no content */
+}
+
+.phenomena-toggle:not(.active) {
+    background: #e0e0e0;
+    color: #333333;
+    opacity: 0.75;
+}
+
+.phenomena-toggle:not(.active):hover {
+    opacity: 0.9;
+}
+
+/* Status indicator */
+.phenomena-toggle::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    width: 4px;
+    height: 100%;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.phenomena-toggle.active::before {
+    opacity: 1;
 }
 
 #toaster {
@@ -379,7 +493,7 @@ html, body {
     font-family: Arial, sans-serif;
     font-size: 14px;
     display: none; /* Hidden by default */
-    z-index: 2000;
+    z-index: 1025;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     animation: fade-in-out 3s ease-in-out;
 }
@@ -403,4 +517,158 @@ html, body {
 
 #realtime-mode:hover {
     background: #0056b3;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    #layer-control {
+        width: 100%;
+        height: 100%;
+    }
+
+    .drawer-content {
+        padding: 15px;
+    }
+
+    .phenomena-toggles {
+        gap: 10px;
+    }
+
+    .phenomena-toggle {
+        padding: 8px 14px;
+        min-width: 100px;
+    }
+
+    #time-control {
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 400px;
+        padding: 15px;
+        bottom: 10px;
+        z-index: 1002;
+    }
+
+    #warnings-modal {
+        width: 100%;
+        height: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+}
+
+/* Desktop specific overrides */
+@media (min-width: 769px) {
+    #layer-control, #warnings-modal {
+        max-height: 80vh;
+    }
+
+    .control-toggle-button {
+        height: 40px;
+    }
+    
+    #warnings-modal {
+        min-height: 400px;
+    }
+}
+
+.layer-section {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.layer-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.layer-toggle input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.layer-options {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.layer-options label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.layer-options input[type="range"] {
+    flex: 1;
+    cursor: pointer;
+}
+
+/* Improve toggle buttons positioning */
+.control-toggle-button {
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.control-toggle-button:hover {
+    background: #0056b3;
+    transform: translateX(2px);
+}
+
+.control-toggle-group {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1003;
+}
+
+.control-toggle-button {
+    display: block;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 10px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.5em;
+    text-align: center;
+    line-height: 40px;
+}
+
+/* Ensure proper stacking context */
+#branding-overlay { z-index: 1000; }
+#layer-control { z-index: 1004; }
+#warnings-modal { z-index: 2000; }
+#time-control { z-index: 1002; }
+.control-toggle-group { z-index: 1003; }
+
+.control-close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    color: #333;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.control-close-button:hover {
+    background: rgba(0, 0, 0, 0.1);
 }
