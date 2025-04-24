@@ -21,7 +21,6 @@ export function updateRadarTime(radarTime) {
     if (!brandingOverlay) {
         return;
     }
-    const currentText = brandingOverlay.textContent;
     const mode = getIsRealTime() ? 'realtime' : 'archive';
     const currentTime = getCurrentTime();
     const localWarningsTime = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });

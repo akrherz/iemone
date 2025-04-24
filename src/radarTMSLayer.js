@@ -20,8 +20,8 @@ export function createRadarTMSLayer(map) {
     map.addLayer(radarTMSLayer);
     updateRadarTime(time);
 
-    subscribeToCurrentTime((time) => {
-        updateRadarTMSLayer(rectifyToFiveMinutes(time));
+    subscribeToCurrentTime((currenttime) => {
+        updateRadarTMSLayer(rectifyToFiveMinutes(currenttime));
     });
 
     return radarTMSLayer;

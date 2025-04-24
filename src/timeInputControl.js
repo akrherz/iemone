@@ -4,7 +4,6 @@ import {
     subscribeToRealTime, getIsRealTime, setIsRealTime
 } from './stateManager';
 import { rectifyToFiveMinutes } from './utils';
-import { saveState } from './statePersistence';
 
 let timeInput = null;
 let animationInterval = null;

@@ -41,7 +41,7 @@ function getWarningURL(time) {
 }
 
 export function createWarningsLayer(map, tableElement, initialState = null) {
-    if (initialState && initialState.activePhenomena) {
+    if (initialState?.activePhenomena) {
         activePhenomenaSignificance = initialState.activePhenomena;
     }
 
@@ -76,7 +76,7 @@ export function createWarningsLayer(map, tableElement, initialState = null) {
                 // Inner colored stroke
                 new Style({
                     stroke: new Stroke({
-                        color: color,
+                        color,
                         width: 3
                     })
                 })
