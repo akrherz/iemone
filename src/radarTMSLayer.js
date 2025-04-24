@@ -2,12 +2,14 @@ import Tile from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
 import { formatTimestampToUTC, rectifyToFiveMinutes } from './utils';
 import { getCurrentTime, subscribeToCurrentTime } from './stateManager';
+import { updateRadarTime } from './brandingOverlay';
 
 const SERVICE = "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/";
 let radarTMSLayer = null;
 
 export function createRadarTMSLayer(map) {
-    const stamp = formatTimestampToUTC(rectifyToFiveMinutes(getCurrentTime()));
+    const time = rectifyToFiveMinutes(getCurrentTime());
+    const stamp = formatTimestampToUTC(time);
     radarTMSLayer = new Tile({
         source: new XYZ({
             url: `${SERVICE}ridge::USCOMP-N0Q-${stamp}/{z}/{x}/{y}.png`,
@@ -16,6 +18,7 @@ export function createRadarTMSLayer(map) {
         visible: true
     });
     map.addLayer(radarTMSLayer);
+    updateRadarTime(time);
 
     subscribeToCurrentTime((time) => {
         updateRadarTMSLayer(rectifyToFiveMinutes(time));
@@ -31,6 +34,7 @@ export function updateRadarTMSLayer(time) {
         const current_url = radarTMSLayer.getSource().getUrls()[0];
         if (current_url !== new_url) {
             radarTMSLayer.getSource().setUrl(new_url);
+            updateRadarTime(time);
         }
     }
 }

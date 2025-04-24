@@ -7,8 +7,27 @@ import { Stroke, Style } from 'ol/style';
 import { showToaster } from './toaster';
 import { formatTimestampToUTC } from './utils';
 import { subscribeToCurrentTime, getCurrentTime } from './stateManager';
+import { saveState } from './statePersistence';
 
 let warningsLayer = null;
+let activePhenomenaSignificance = new Set([
+    "TO.W", "SV.W", "FF.W", "FL.W", "MA.W", 
+    "DS.W", "SQ.W", "EW.W", "FL.Y", "FA.Y", "DS.Y"
+]);
+
+const colorLookup = {
+    "TO.W": "#FF0000",  // Red
+    "SV.W": "#FFA500",  // Orange
+    "FF.W": "#8B0000",  // Dark Red
+    "FL.W": "#00FF00",  // Green
+    "MA.W": "#FFA500",  // Orange
+    "DS.W": "#FFE4C4",  // Bisque
+    "SQ.W": "#C71585",  // Medium Violet Red
+    "EW.W": "#FF00FF",  // Magenta
+    "FL.Y": "#00FF7F",  // Spring Green
+    "FA.Y": "#00FF7F",  // Spring Green
+    "DS.Y": "#BDB76B"   // Dark Khaki
+};
 
 /**
  * Get the url for the warnings GeoJSON based on the time.
@@ -21,24 +40,13 @@ function getWarningURL(time) {
 
 }
 
-export function createWarningsLayer(map, tableElement) {
-    const colorLookup = {
-        "FL.A": "#2E8B57",
-        "MA.W": "#FFA500",
-        "FL.W": "#00FF00",
-        "FF.W": "#8B0000",
-        "SV.W": "#FFA500",
-        "DS.Y": "#BDB76B",
-        "FL.Y": "#00FF7F",
-        "DS.W": "#FFE4C4",
-        "FA.A": "#2E8B57",
-        "FA.W": "#00FF00",
-        "SQ.W": "#C71585",
-        "TO.W": "#FF0000",
-        "FA.Y": "#00FF7F"
-    };
+export function createWarningsLayer(map, tableElement, initialState = null) {
+    if (initialState && initialState.activePhenomena) {
+        activePhenomenaSignificance = initialState.activePhenomena;
+    }
 
-    const activePhenomenaSignificance = new Set(["TO.W", "SV.W", "FF.W", "EW.W", "SQ.W", "DS.W"]);
+    // Make activePhenomenaSignificance available globally for state persistence
+    window.activePhenomenaSignificance = activePhenomenaSignificance;
 
     const geojsonSource = new VectorSource({
         format: new GeoJSON(),
@@ -57,12 +65,22 @@ export function createWarningsLayer(map, tableElement) {
             }
 
             const color = colorLookup[key] || 'gray';
-            return new Style({
-                stroke: new Stroke({
-                    color,
-                    width: 3
+            return [
+                // Outer black stroke
+                new Style({
+                    stroke: new Stroke({
+                        color: '#000000',
+                        width: 5
+                    })
+                }),
+                // Inner colored stroke
+                new Style({
+                    stroke: new Stroke({
+                        color: color,
+                        width: 3
+                    })
                 })
-            });
+            ];
         }
     });
 
@@ -161,7 +179,11 @@ export function createWarningsLayer(map, tableElement) {
             const key = toggle.dataset.key;
             if (key) {
                 const count = phenomenaSignificanceCounts[key] || 0;
-                toggle.textContent = `${key} (${count})`;
+                const countBadge = toggle.querySelector('.count');
+                if (countBadge) {
+                    countBadge.textContent = count;
+                    countBadge.style.display = count > 0 ? 'block' : 'none';
+                }
             }
         });
     }
@@ -177,15 +199,32 @@ export function createWarningsLayer(map, tableElement) {
     if (warningsLayerToggle) {
         warningsLayerToggle.addEventListener('change', (event) => {
             warningsLayer.setVisible(event.target.checked);
+            saveState({
+                radarVisible: document.getElementById('toggle-tms-layer').checked,
+                radarOpacity: parseFloat(document.getElementById('tms-opacity-slider').value),
+                warningsVisible: event.target.checked,
+                activePhenomena: activePhenomenaSignificance
+            });
         });
+
+        // Initialize from saved state if provided
+        if (initialState) {
+            warningsLayer.setVisible(initialState.warningsVisible);
+            warningsLayerToggle.checked = initialState.warningsVisible;
+        }
     }
 
     const phenomenaToggles = document.querySelectorAll('.phenomena-toggle');
     phenomenaToggles.forEach((toggle) => {
         const key = toggle.dataset.key;
-
-        if (key === "FL.W") {
+        
+        // Initialize toggle button state based on activePhenomenaSignificance
+        if (!activePhenomenaSignificance.has(key)) {
             toggle.classList.remove('active');
+            toggle.style.background = '#ccc';
+        } else {
+            toggle.classList.add('active');
+            toggle.style.background = colorLookup[key] || '';
         }
 
         toggle.addEventListener('click', (event) => {
@@ -199,6 +238,12 @@ export function createWarningsLayer(map, tableElement) {
                 event.target.style.background = colorLookup[key] || '';
             }
             warningsLayer.changed();
+            saveState({
+                radarVisible: document.getElementById('toggle-tms-layer').checked,
+                radarOpacity: parseFloat(document.getElementById('tms-opacity-slider').value),
+                warningsVisible: warningsLayerToggle.checked,
+                activePhenomena: activePhenomenaSignificance
+            });
         });
     });
 

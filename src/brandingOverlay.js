@@ -1,4 +1,3 @@
-
 import { getCurrentTime, getIsRealTime, subscribeToRealTime, subscribeToCurrentTime } from "./stateManager";
 import { rectifyToFiveMinutes } from "./utils";
 
@@ -9,11 +8,25 @@ function updateBrandingOverlay(mode) {
     }
     const currentTime = getCurrentTime();
     const radarTime = rectifyToFiveMinutes(currentTime);
-    // Create a local time message like RADAR: 10:00 AM Warnings: 10:00 AM
     const localWarningsTime = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const localRadarTime = radarTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const localTimeMessage = `RADAR: ${localRadarTime} Warnings: ${localWarningsTime}`;
     brandingOverlay.dataset.mode = mode;
+    const title = `IEM1: ${mode === 'realtime' ? 'Realtime' : 'Archive'} ${localTimeMessage}`;
+    brandingOverlay.textContent = title;
+}
+
+export function updateRadarTime(radarTime) {
+    const brandingOverlay = document.getElementById('branding-overlay');
+    if (!brandingOverlay) {
+        return;
+    }
+    const currentText = brandingOverlay.textContent;
+    const mode = getIsRealTime() ? 'realtime' : 'archive';
+    const currentTime = getCurrentTime();
+    const localWarningsTime = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const localRadarTime = radarTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const localTimeMessage = `RADAR: ${localRadarTime} Warnings: ${localWarningsTime}`;
     const title = `IEM1: ${mode === 'realtime' ? 'Realtime' : 'Archive'} ${localTimeMessage}`;
     brandingOverlay.textContent = title;
 }

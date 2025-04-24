@@ -4,6 +4,7 @@ import {
     subscribeToRealTime, getIsRealTime, setIsRealTime
 } from './stateManager';
 import { rectifyToFiveMinutes } from './utils';
+import { saveState } from './statePersistence';
 
 let timeInput = null;
 let animationInterval = null;
@@ -35,7 +36,7 @@ function toggleAnimation() {
         clearInterval(animationInterval);
         animationInterval = null;
         if (timePlayPauseButton) {
-            timePlayPauseButton.textContent = '⏯';
+            timePlayPauseButton.textContent = '▶';
         }
         progressBar.style.width = '0%';
         return;
