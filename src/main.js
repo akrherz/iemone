@@ -8,35 +8,22 @@ import { setupWarningsModal } from './warningsModal';
 import { setupTimeInputControl } from './timeInputControl';
 import { setupLayerControls } from './layerControls';
 import { initBrandingOverlay } from './brandingOverlay';
-import { loadState } from './statePersistence';
 
 document.addEventListener('DOMContentLoaded', () => {
+    // The state manager should already be initialized by this point
+    // So now we can inspect the URL to see what it says
+    initializeURLHandler();
+
+    // map will push lat,lon,zoom to state
     const map = initializeMap();
-    const warningsTable = document.getElementById('warnings-table');
-    const savedState = loadState();
-
-    if (savedState) {
-        // Initialize UI elements with saved state
-        const tmsOpacitySlider = document.getElementById('tms-opacity-slider');
-        const tmsLayerToggle = document.getElementById('toggle-tms-layer');
-        if (tmsOpacitySlider) {
-            tmsOpacitySlider.value = savedState.radarOpacity;
-        }
-        if (tmsLayerToggle) {
-            tmsLayerToggle.checked = savedState.radarVisible;
-        }
-    }
-
     const radarTMSLayer = createRadarTMSLayer(map);
-    const warningsLayer = createWarningsLayer(map, warningsTable, savedState);
+    const warningsLayer = createWarningsLayer(map);
+    const tableElement = document.getElementById('warnings-table');
 
-    initBrandingOverlay();
-
-    setupWarningsTable(warningsTable, warningsLayer);
-    setupWarningsModal();
+    // Setup UI components that depend on state
     setupTimeInputControl();
-
+    setupWarningsTable(tableElement, warningsLayer);
+    setupWarningsModal();
     setupLayerControls(radarTMSLayer);
-
-    initializeURLHandler(map);
+    initBrandingOverlay();
 });

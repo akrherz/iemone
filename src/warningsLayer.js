@@ -6,7 +6,7 @@ import { Stroke, Style } from 'ol/style';
 
 import { showToaster } from './toaster';
 import { formatTimestampToUTC } from './utils';
-import { subscribeToCurrentTime, getCurrentTime } from './stateManager';
+import { subscribeToCurrentTime, getCurrentTime, getIsRealTime } from './stateManager';
 import { saveState } from './statePersistence';
 
 let warningsLayer = null;

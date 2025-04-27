@@ -1,23 +1,13 @@
 import { updateRadarTMSLayer } from './radarTMSLayer';
-import {
-    getCurrentTime, subscribeToCurrentTime, setCurrentTime,
-    subscribeToRealTime, getIsRealTime, setIsRealTime
-} from './stateManager';
-import { rectifyToFiveMinutes } from './utils';
+import { getCurrentTime, setCurrentTime, getIsRealTime, setIsRealTime, subscribeToCurrentTime, subscribeToRealTime } from './stateManager';
 
 let timeInput = null;
 let animationInterval = null;
-let realTimeInterval = null;
 
-/**
- * Callback when the time input changes.
- * @param {*} event 
- */
 function handleTimeInputChange(event) {
-    const cb = timeInput.onchange;
-    timeInput.onchange = null;
+    if (!timeInput) return;
     setCurrentTime(new Date(event.target.value));
-    timeInput.onchange = cb;
+    updateRadarTMSLayer(getCurrentTime());
 }
 
 function toggleAnimation() {
@@ -41,20 +31,16 @@ function toggleAnimation() {
         return;
     }
 
-    let endTime = rectifyToFiveMinutes(getCurrentTime());
-    let now = new Date();
-    now.setMinutes(endTime.getMinutes() - 55);
+    let currentTime = getCurrentTime();
+    let now = new Date(currentTime);
+    now.setMinutes(currentTime.getMinutes() - 55);
     let step = 0;
     const totalSteps = 12;
 
     animationInterval = setInterval(() => {
         if (step >= totalSteps) {
-            if (getIsRealTime()){
-                // Update the end timestamp
-                endTime = rectifyToFiveMinutes(getCurrentTime());
-            }
             step = 0;
-            now = new Date(endTime.getTime() - 55 * 60 * 1000);
+            now = new Date(currentTime.getTime() - 55 * 60 * 1000);
         }
         updateRadarTMSLayer(now);
         now.setMinutes(now.getMinutes() + 5);
@@ -70,12 +56,14 @@ function toggleAnimation() {
 
 export function setupTimeInputControl() {
     timeInput = document.getElementById('current-time');
-
-    subscribeToCurrentTime((newTime) => {
-        updateTimeInput(newTime);
+    
+    // Subscribe to both time and realtime mode changes
+    subscribeToCurrentTime((currentTime) => {
+        updateTimeInput(currentTime);
     });
-    subscribeToRealTime((isRealTime) => {
-        updateUI();
+    
+    subscribeToRealTime((isRealtime) => {
+        updateUI(isRealtime);
     });
 
     timeInput.addEventListener('change', handleTimeInputChange);
@@ -88,40 +76,35 @@ export function setupTimeInputControl() {
     timeStepBackwardButton.addEventListener('click', () => stepTime(-5));
     timeStepForwardButton.addEventListener('click', () => stepTime(5));
     timePlayPauseButton.addEventListener('click', toggleAnimation);
-    realtimeModeButton.addEventListener('click', toggleRealTimeMode);
+    realtimeModeButton.addEventListener('click', () => setIsRealTime(true));
 }
 
-function updateTimeInput(currentTime) {
+function updateTimeInput(time) {
     if (timeInput) {
-        const year = currentTime.getFullYear();
-        const month = (currentTime.getMonth() + 1).toString().padStart(2, '0');
-        const day = currentTime.getDate().toString().padStart(2, '0');
-        const hours = currentTime.getHours().toString().padStart(2, '0');
-        const minutes = currentTime.getMinutes().toString().padStart(2, '0');
+        const year = time.getFullYear();
+        const month = (time.getMonth() + 1).toString().padStart(2, '0');
+        const day = time.getDate().toString().padStart(2, '0');
+        const hours = time.getHours().toString().padStart(2, '0');
+        const minutes = time.getMinutes().toString().padStart(2, '0');
         timeInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
     }
 }
 
 function stepTime(minutes) {
     const currentTime = getCurrentTime();
-    currentTime.setMinutes(currentTime.getMinutes() + minutes);
-    setCurrentTime(currentTime);
+    const newTime = new Date(currentTime);
+    newTime.setMinutes(currentTime.getMinutes() + minutes);
+    setCurrentTime(newTime);
+    updateRadarTMSLayer(newTime);
 }
 
-function toggleRealTimeMode() {
-    setIsRealTime(!getIsRealTime());
-}
-
-function updateUI() {
-    const isRealTime = getIsRealTime();
+function updateUI(isRealtime) {
     const realtimeModeButton = document.getElementById('realtime-mode');
     const timeStepBackwardButton = document.getElementById('time-step-backward');
     const timeStepForwardButton = document.getElementById('time-step-forward');
     const timePlayPauseButton = document.getElementById('time-play-pause');
 
-    if (!isRealTime) {
-        clearInterval(realTimeInterval);
-        realTimeInterval = null;
+    if (!isRealtime) {
         realtimeModeButton.textContent = '⏱';
         realtimeModeButton.title = 'Enable Real-Time Mode';
 
@@ -131,26 +114,15 @@ function updateUI() {
         timeStepBackwardButton.title = '';
         timeStepForwardButton.disabled = false;
         timeStepForwardButton.title = '';
-        return;
+    } else {
+        realtimeModeButton.textContent = '🔴';
+        realtimeModeButton.title = 'Disable Real-Time Mode';
+
+        timeInput.disabled = true;
+        timeInput.title = 'Disabled in Real-Time Mode';
+        timeStepBackwardButton.disabled = true;
+        timeStepBackwardButton.title = 'Disabled in Real-Time Mode';
+        timeStepForwardButton.disabled = true;
+        timeStepForwardButton.title = 'Disabled in Real-Time Mode';
     }
-
-    const now = new Date();
-    setCurrentTime(now);
-
-    realTimeInterval = setInterval(() => {
-        const lnow = new Date();
-        lnow.setSeconds(0);
-        lnow.setMilliseconds(0);
-        setCurrentTime(lnow);
-    }, 60000);
-
-    realtimeModeButton.textContent = '🔴';
-    realtimeModeButton.title = 'Disable Real-Time Mode';
-
-    timeInput.disabled = true;
-    timeInput.title = 'Disabled in Real-Time Mode';
-    timeStepBackwardButton.disabled = true;
-    timeStepBackwardButton.title = 'Disabled in Real-Time Mode';
-    timeStepForwardButton.disabled = true;
-    timeStepForwardButton.title = 'Disabled in Real-Time Mode';
 }
