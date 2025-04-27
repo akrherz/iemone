@@ -1,7 +1,19 @@
 import { getCurrentTime, getIsRealTime, subscribeToRealTime, subscribeToCurrentTime } from "./stateManager";
 import { rectifyToFiveMinutes } from "./utils";
 
-function updateBrandingOverlay() {
+export function updateAnimationBranding(radarTime) {
+    const brandingOverlay = document.getElementById('branding-overlay');
+    if (!brandingOverlay) return;
+    
+    const localRadarTime = rectifyToFiveMinutes(radarTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const currentTime = getCurrentTime();
+    const localWarningsTime = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    brandingOverlay.dataset.mode = 'archive';
+    brandingOverlay.textContent = `IEM1: Archive (Animating) RADAR: ${localRadarTime} Warnings: ${localWarningsTime}`;
+}
+
+export function updateBrandingOverlay() {
     const isRealTime = getIsRealTime();
     const brandingOverlay = document.getElementById('branding-overlay');
     if (!brandingOverlay) {

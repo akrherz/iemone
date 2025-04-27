@@ -1,5 +1,6 @@
 import { updateRadarTMSLayer } from './radarTMSLayer';
 import { getCurrentTime, setCurrentTime, setIsRealTime, subscribeToCurrentTime, subscribeToRealTime } from './stateManager';
+import { updateAnimationBranding, updateBrandingOverlay } from './brandingOverlay';
 
 let timeInput = null;
 let animationInterval = null;
@@ -28,10 +29,11 @@ function toggleAnimation() {
             timePlayPauseButton.textContent = '⏵︎';
         }
         progressBar.style.width = '0%';
+        updateBrandingOverlay(); // Reset branding to normal state
         return;
     }
 
-    let currentTime = getCurrentTime();
+    const currentTime = getCurrentTime();
     let now = new Date(currentTime);
     now.setMinutes(currentTime.getMinutes() - 55);
     let step = 0;
@@ -43,6 +45,7 @@ function toggleAnimation() {
             now = new Date(currentTime.getTime() - 55 * 60 * 1000);
         }
         updateRadarTMSLayer(now);
+        updateAnimationBranding(now);
         now.setMinutes(now.getMinutes() + 5);
         step++;
         const progressPercentage = (step / totalSteps) * 100;
