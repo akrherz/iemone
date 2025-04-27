@@ -26,6 +26,14 @@
 </div>
 
 <div id="time-control" class="time-control">
+    <div class="mode-toggle-container">
+        <div class="mode-radio-group">
+            <input type="radio" id="archive-mode" name="mode" value="archive" checked>
+            <label for="archive-mode">Archive</label>
+            <input type="radio" id="realtime-mode" name="mode" value="realtime">
+            <label for="realtime-mode">Real-time</label>
+        </div>
+    </div>
     <div class="time-input-container">
         <input type="datetime-local" id="current-time" class="time-input">
     </div>
@@ -33,7 +41,6 @@
         <button id="time-step-backward">◀</button>
         <button id="time-play-pause">▶</button>
         <button id="time-step-forward">▶</button>
-        <button id="realtime-mode">⏱</button>
     </div>
     <div id="animation-progress" class="progress-bar"></div>
 </div>

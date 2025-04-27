@@ -17,8 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // map will push lat,lon,zoom to state
     const map = initializeMap();
     const radarTMSLayer = createRadarTMSLayer(map);
-    const warningsLayer = createWarningsLayer(map);
     const tableElement = document.getElementById('warnings-table');
+    const warningsLayer = createWarningsLayer(map, tableElement);
 
     // Setup UI components that depend on state
     setupTimeInputControl();
