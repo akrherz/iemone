@@ -1,4 +1,4 @@
-import { updateRadarTMSLayer } from './radarTMSLayer';
+import { updateRadarTMSLayer, resetRadarTMSLayer } from './radarTMSLayer';
 import { getCurrentTime, setCurrentTime, setIsRealTime, subscribeToCurrentTime, subscribeToRealTime } from './stateManager';
 import { updateAnimationBranding, updateBrandingOverlay } from './brandingOverlay';
 
@@ -29,6 +29,7 @@ function toggleAnimation() {
             timePlayPauseButton.textContent = '⏵︎';
         }
         progressBar.style.width = '0%';
+        resetRadarTMSLayer(); // Reset radar to match app state
         updateBrandingOverlay(); // Reset branding to normal state
         return;
     }
