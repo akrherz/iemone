@@ -30,8 +30,7 @@ export function initializeMap() {
     });
 
     map.on('moveend', () => {
-        const view = map.getView();
-        const center = view.getCenter();
+        const center = map.getView().getCenter();
         const lonLat = toLonLat(center);
         const zoom = view.getZoom();
 

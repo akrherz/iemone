@@ -30,7 +30,7 @@ export function updateBrandingOverlay() {
 }
 
 export function initBrandingOverlay() {
-    subscribeToRealTime((isRealTime) => {
+    subscribeToRealTime(() => {
         updateBrandingOverlay();
     });
     subscribeToCurrentTime((_currentTime) => {
