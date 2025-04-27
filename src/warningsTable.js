@@ -1,6 +1,6 @@
-export function setupWarningsTable(warningsTable, warningsLayer) {
+export function setupWarningsTable(tableElement, warningsLayer) {
     function updateTable(features) {
-        const tbody = warningsTable.querySelector('tbody');
+        const tbody = tableElement.querySelector('tbody');
         tbody.innerHTML = ''; // Clear existing rows
 
         features.forEach((feature) => {

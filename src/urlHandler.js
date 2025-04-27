@@ -1,13 +1,13 @@
-import { fromLonLat, toLonLat } from 'ol/proj';
+// Handles things with the URL
+import { setCurrentTime, subscribeToState, subscribeToCurrentTime, setState, StateKeys } from './stateManager';
 import { formatTimestampToUTC } from './utils';
-import { subscribeToCurrentTime, setCurrentTime, subscribeToRealTime, setIsRealTime, getIsRealTime } from './stateManager';
 
-export function getQueryParams() {
+function getQueryParams() {
     const queryParams = new URLSearchParams(window.location.search);
     return Object.fromEntries(queryParams.entries());
 }
 
-export function updateQueryParams(key, value) {
+function updateQueryParams(key, value) {
     const queryParams = new URLSearchParams(window.location.search);
     if (value === null) {
         queryParams.delete(key);
@@ -17,52 +17,50 @@ export function updateQueryParams(key, value) {
     history.replaceState(null, '', `?${queryParams.toString()}`);
 }
 
-export function initializeURLHandler(map) {
+export function initializeURLHandler() {
+    // Handle initial URL parameters
+    const params = getQueryParams();
+    if (params.timestamp) {
+        const year = parseInt(params.timestamp.slice(0, 4), 10);
+        const month = parseInt(params.timestamp.slice(4, 6), 10) - 1;
+        const day = parseInt(params.timestamp.slice(6, 8), 10);
+        const hours = parseInt(params.timestamp.slice(8, 10), 10);
+        const minutes = parseInt(params.timestamp.slice(10, 12), 10);
+        const time = new Date(Date.UTC(year, month, day, hours, minutes));
+        // This also disables realtime mode
+        setCurrentTime(time);
+    }
+    // Handle initial map position from URL
+    if (params.lon && params.lat  && params.zoom) {
+        setState(StateKeys.LON, parseFloat(params.lon));
+        setState(StateKeys.LAT, parseFloat(params.lat));
+        setState(StateKeys.ZOOM, parseFloat(params.zoom));
+    }
 
-    map.on('moveend', () => {
-        const center = map.getView().getCenter();
-        const zoom = map.getView().getZoom();
-        const lonLat = toLonLat(center);
-        updateQueryParams('lon', lonLat[0].toFixed(2)); // Longitude
-        updateQueryParams('lat', lonLat[1].toFixed(2)); // Latitude
-        updateQueryParams('zoom', zoom.toFixed(2)); // Zoom level
-    });
-
+    // Subscribe to state changes
     subscribeToCurrentTime((currentTime) => {
-        if (!getIsRealTime()) {
-            const timestamp = formatTimestampToUTC(currentTime);
-            updateQueryParams('timestamp', timestamp);
-        }
+        updateQueryParams('timestamp', formatTimestampToUTC(currentTime));
     });
-    subscribeToRealTime((isRealTime) => {
-        if (isRealTime) {
-            updateQueryParams('realtime', '1');
+
+    subscribeToState(StateKeys.IS_REALTIME, (isRealtime) => {
+        if (isRealtime) {
             updateQueryParams('timestamp', null);
-        } else {
-            updateQueryParams('realtime', null);
         }
     });
 
-    const queryParams = getQueryParams();
-    if (queryParams.timestamp) {
-        // Ensure that realtime is removed
-        setIsRealTime(false);
-        updateQueryParams('realtime', null);
-        const year = parseInt(queryParams.timestamp.slice(0, 4), 10);
-        const month = parseInt(queryParams.timestamp.slice(4, 6), 10) - 1;
-        const day = parseInt(queryParams.timestamp.slice(6, 8), 10);
-        const hours = parseInt(queryParams.timestamp.slice(8, 10), 10);
-        const minutes = parseInt(queryParams.timestamp.slice(10, 12), 10);
-        setCurrentTime(new Date(Date.UTC(year, month, day, hours, minutes)));
-    } else {
-        setIsRealTime(true);
-    }
-    if (queryParams.lon && queryParams.lat) {
-        const lon = parseFloat(queryParams.lon);
-        const lat = parseFloat(queryParams.lat);
-        map.getView().setCenter(fromLonLat([lon, lat]));
-    }
-    if (queryParams.zoom) {
-        map.getView().setZoom(Number(queryParams.zoom));
-    }
+    subscribeToState(StateKeys.LON, (lon) => {
+        if (lon !== null) {
+            updateQueryParams('lon', lon.toFixed(4));
+        }
+    });
+    subscribeToState(StateKeys.LAT, (lat) => {
+        if (lat !== null) {
+            updateQueryParams('lat', lat.toFixed(4));
+        }
+    });
+    subscribeToState(StateKeys.ZOOM, (zoom) => {
+        if (zoom !== null) {
+            updateQueryParams('zoom', zoom);
+        }
+    });
 }

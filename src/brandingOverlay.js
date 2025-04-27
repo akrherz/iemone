@@ -1,7 +1,20 @@
 import { getCurrentTime, getIsRealTime, subscribeToRealTime, subscribeToCurrentTime } from "./stateManager";
 import { rectifyToFiveMinutes } from "./utils";
 
-function updateBrandingOverlay(mode) {
+export function updateAnimationBranding(radarTime) {
+    const brandingOverlay = document.getElementById('branding-overlay');
+    if (!brandingOverlay) return;
+    
+    const localRadarTime = rectifyToFiveMinutes(radarTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const currentTime = getCurrentTime();
+    const localWarningsTime = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    brandingOverlay.dataset.mode = 'archive';
+    brandingOverlay.textContent = `IEM1: Archive (Animating) RADAR: ${localRadarTime} Warnings: ${localWarningsTime}`;
+}
+
+export function updateBrandingOverlay() {
+    const isRealTime = getIsRealTime();
     const brandingOverlay = document.getElementById('branding-overlay');
     if (!brandingOverlay) {
         return;
@@ -11,32 +24,17 @@ function updateBrandingOverlay(mode) {
     const localWarningsTime = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const localRadarTime = radarTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const localTimeMessage = `RADAR: ${localRadarTime} Warnings: ${localWarningsTime}`;
-    brandingOverlay.dataset.mode = mode;
-    const title = `IEM1: ${mode === 'realtime' ? 'Realtime' : 'Archive'} ${localTimeMessage}`;
-    brandingOverlay.textContent = title;
-}
-
-export function updateRadarTime(radarTime) {
-    const brandingOverlay = document.getElementById('branding-overlay');
-    if (!brandingOverlay) {
-        return;
-    }
-    const mode = getIsRealTime() ? 'realtime' : 'archive';
-    const currentTime = getCurrentTime();
-    const localWarningsTime = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const localRadarTime = radarTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const localTimeMessage = `RADAR: ${localRadarTime} Warnings: ${localWarningsTime}`;
-    const title = `IEM1: ${mode === 'realtime' ? 'Realtime' : 'Archive'} ${localTimeMessage}`;
+    brandingOverlay.dataset.mode = isRealTime ? 'realtime' : 'archive';
+    const title = `IEM1: ${isRealTime ? 'Realtime' : 'Archive'} ${localTimeMessage}`;
     brandingOverlay.textContent = title;
 }
 
 export function initBrandingOverlay() {
-    subscribeToRealTime((isRealTime) => {
-        const mode = isRealTime ? 'realtime' : 'archive';
-        updateBrandingOverlay(mode);
+    subscribeToRealTime(() => {
+        updateBrandingOverlay();
     });
     subscribeToCurrentTime((_currentTime) => {
-        const mode = getIsRealTime() ? 'realtime' : 'archive';
-        updateBrandingOverlay(mode);
+        updateBrandingOverlay();
     });
+    updateBrandingOverlay();
 }

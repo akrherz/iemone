@@ -1,27 +1,33 @@
-import Tile from 'ol/layer/Tile';
+import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
 import { formatTimestampToUTC, rectifyToFiveMinutes } from './utils';
 import { getCurrentTime, subscribeToCurrentTime } from './stateManager';
-import { updateRadarTime } from './brandingOverlay';
 
 const SERVICE = "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/";
 let radarTMSLayer = null;
 
+function getRadarURL(time) {
+    // Always rectify the timestamp for radar requests
+    const rectifiedTime = rectifyToFiveMinutes(time);
+    const formattedTimestamp = formatTimestampToUTC(rectifiedTime);
+    return `${SERVICE}ridge::USCOMP-N0Q-${formattedTimestamp}/{z}/{x}/{y}.png`;
+}
+
 export function createRadarTMSLayer(map) {
-    const time = rectifyToFiveMinutes(getCurrentTime());
-    const stamp = formatTimestampToUTC(time);
-    radarTMSLayer = new Tile({
+    const time = getCurrentTime();
+    const url = getRadarURL(time);
+    radarTMSLayer = new TileLayer({
         source: new XYZ({
-            url: `${SERVICE}ridge::USCOMP-N0Q-${stamp}/{z}/{x}/{y}.png`,
+            url,
             crossOrigin: 'anonymous'
         }),
         visible: true
     });
     map.addLayer(radarTMSLayer);
-    updateRadarTime(time);
 
-    subscribeToCurrentTime((currenttime) => {
-        updateRadarTMSLayer(rectifyToFiveMinutes(currenttime));
+    // Subscribe to time changes
+    subscribeToCurrentTime((currentTime) => {
+        radarTMSLayer.getSource().setUrl(getRadarURL(currentTime));
     });
 
     return radarTMSLayer;
@@ -29,12 +35,12 @@ export function createRadarTMSLayer(map) {
 
 export function updateRadarTMSLayer(time) {
     if (radarTMSLayer) {
-        const timestamp = formatTimestampToUTC(time);
-        const new_url = `${SERVICE}ridge::USCOMP-N0Q-${timestamp}/{z}/{x}/{y}.png`;
-        const current_url = radarTMSLayer.getSource().getUrls()[0];
-        if (current_url !== new_url) {
-            radarTMSLayer.getSource().setUrl(new_url);
-            updateRadarTime(time);
-        }
+        radarTMSLayer.getSource().setUrl(getRadarURL(time));
+    }
+}
+
+export function resetRadarTMSLayer() {
+    if (radarTMSLayer) {
+        radarTMSLayer.getSource().setUrl(getRadarURL(getCurrentTime()));
     }
 }

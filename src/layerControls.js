@@ -1,5 +1,14 @@
 import { saveState } from './statePersistence';
 
+function saveLayerState() {
+    saveState({
+        radarVisible: document.getElementById('toggle-tms-layer')?.checked,
+        radarOpacity: document.getElementById('tms-opacity-slider')?.value,
+        warningsVisible: document.getElementById('toggle-warnings-layer')?.checked,
+        activePhenomena: new Set(Array.from(document.querySelectorAll('.phenomena-checkbox:checked')).map(cb => cb.value))
+    });
+}
+
 export function setupLayerControls(radarTMSLayer) {
     const layersToggle = document.getElementById('layers-toggle');
     const layerControl = document.getElementById('layer-control');
@@ -24,13 +33,7 @@ export function setupLayerControls(radarTMSLayer) {
     if (tmsLayerToggle) {
         tmsLayerToggle.addEventListener('change', (event) => {
             radarTMSLayer.setVisible(event.target.checked);
-            saveState({
-                radarVisible: event.target.checked,
-                radarOpacity: parseFloat(tmsOpacitySlider.value),
-                warningsVisible: document.getElementById('toggle-warnings-layer').checked,
-                activePhenomena: window.activePhenomenaSignificance,
-                isRealTime: window.isRealTime
-            });
+            saveLayerState();
         });
 
         // Initialize the TMS layer visibility
@@ -40,13 +43,7 @@ export function setupLayerControls(radarTMSLayer) {
     if (tmsOpacitySlider) {
         tmsOpacitySlider.addEventListener('input', (event) => {
             radarTMSLayer.setOpacity(parseFloat(event.target.value));
-            saveState({
-                radarVisible: tmsLayerToggle.checked,
-                radarOpacity: parseFloat(event.target.value),
-                warningsVisible: document.getElementById('toggle-warnings-layer').checked,
-                activePhenomena: window.activePhenomenaSignificance,
-                isRealTime: window.isRealTime
-            });
+            saveLayerState();
         });
 
         // Initialize the TMS layer opacity
