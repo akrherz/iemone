@@ -25,7 +25,7 @@ function toggleAnimation() {
         clearInterval(animationInterval);
         animationInterval = null;
         if (timePlayPauseButton) {
-            timePlayPauseButton.textContent = '▶';
+            timePlayPauseButton.textContent = '⏵︎';
         }
         progressBar.style.width = '0%';
         return;
@@ -50,7 +50,7 @@ function toggleAnimation() {
     }, 1000);
 
     if (timePlayPauseButton) {
-        timePlayPauseButton.textContent = '⏸';
+        timePlayPauseButton.textContent = '⏸︎';
     }
 }
 
@@ -124,8 +124,6 @@ function updateUI(isRealtime) {
         timeStepBackwardButton.title = '';
         timeStepForwardButton.disabled = false;
         timeStepForwardButton.title = '';
-        timePlayPauseButton.disabled = false;
-        timePlayPauseButton.title = '';
     } else {
         timeInput.disabled = true;
         timeInput.title = 'Disabled in Real-Time Mode';
@@ -133,7 +131,8 @@ function updateUI(isRealtime) {
         timeStepBackwardButton.title = 'Disabled in Real-Time Mode';
         timeStepForwardButton.disabled = true;
         timeStepForwardButton.title = 'Disabled in Real-Time Mode';
-        timePlayPauseButton.disabled = true;
-        timePlayPauseButton.title = 'Disabled in Real-Time Mode';
     }
+    // Animation button is always enabled
+    timePlayPauseButton.disabled = false;
+    timePlayPauseButton.title = '';
 }
