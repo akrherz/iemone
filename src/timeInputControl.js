@@ -1,6 +1,7 @@
 import { updateRadarTMSLayer, resetRadarTMSLayer } from './radarTMSLayer';
-import { getCurrentTime, setCurrentTime, setIsRealTime, subscribeToCurrentTime, subscribeToRealTime } from './stateManager';
+import { getCurrentTime, setCurrentTime, setIsRealTime, getIsRealTime, subscribeToCurrentTime, subscribeToRealTime } from './stateManager';
 import { updateAnimationBranding, updateBrandingOverlay } from './brandingOverlay';
+import { saveState } from './statePersistence';
 
 let timeInput = null;
 let animationInterval = null;
@@ -85,16 +86,27 @@ export function setupTimeInputControl() {
     const timeStepForwardButton = document.getElementById('time-step-forward');
 
     // Set up radio button event listeners
-    document.getElementById('realtime-mode').addEventListener('change', (e) => {
+    const realtimeMode = document.getElementById('realtime-mode');
+    const archiveMode = document.getElementById('archive-mode');
+    const isRealtime = getIsRealTime();
+
+    realtimeMode.checked = isRealtime;
+    archiveMode.checked = !isRealtime;
+
+    realtimeMode.addEventListener('change', (e) => {
         setIsRealTime(e.target.checked);
+        saveState();
     });
-    document.getElementById('archive-mode').addEventListener('change', (e) => {
+    archiveMode.addEventListener('change', (e) => {
         setIsRealTime(!e.target.checked);
+        saveState();
     });
 
     timeStepBackwardButton.addEventListener('click', () => stepTime(-5));
     timeStepForwardButton.addEventListener('click', () => stepTime(5));
     timePlayPauseButton.addEventListener('click', toggleAnimation);
+
+
 }
 
 function updateTimeInput(time) {
@@ -114,6 +126,7 @@ function stepTime(minutes) {
     newTime.setMinutes(currentTime.getMinutes() + minutes);
     setCurrentTime(newTime);
     updateRadarTMSLayer(newTime);
+    saveState();
 }
 
 function updateUI(isRealtime) {
