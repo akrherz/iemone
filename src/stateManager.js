@@ -12,8 +12,8 @@ const savedState = loadState();
 const state = {
     [StateKeys.CURRENT_TIME]: savedState?.currentTime ? new Date(savedState.currentTime) : new Date(),
     [StateKeys.IS_REALTIME]: savedState?.isRealtime ?? true,
-    [StateKeys.LAT]: savedState?.lat ?? 39.8283,
-    [StateKeys.LON]: savedState?.lon ?? -98.5795,
+    [StateKeys.LAT]: savedState?.latitude ?? 39.8283,
+    [StateKeys.LON]: savedState?.longitude ?? -98.5795,
     [StateKeys.ZOOM]: savedState?.zoom ?? 4.0,
 };
 const subscribers = {};

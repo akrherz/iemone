@@ -1,12 +1,7 @@
 import { saveState } from './statePersistence';
 
 function saveLayerState() {
-    saveState({
-        radarVisible: document.getElementById('toggle-tms-layer')?.checked,
-        radarOpacity: document.getElementById('tms-opacity-slider')?.value,
-        warningsVisible: document.getElementById('toggle-warnings-layer')?.checked,
-        activePhenomena: new Set(Array.from(document.querySelectorAll('.phenomena-checkbox:checked')).map(cb => cb.value))
-    });
+    saveState();
 }
 
 export function setupLayerControls(radarTMSLayer) {
