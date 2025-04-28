@@ -1,18 +1,12 @@
 const STATE_KEY = 'iemone_state';
 import { StateKeys, getState } from './stateManager';
+import { getActivePhenomenaSignificance } from './warningsLayer';
 
-export function saveState({
-    radarVisible,
-    radarOpacity,
-    warningsVisible,
-    activePhenomena,
-}) {
+export function saveState() {
     const currentTime = getState(StateKeys.CURRENT_TIME);
+    const activePhenomena = getActivePhenomenaSignificance();
     const localstate = {
-        radarVisible,
-        radarOpacity,
-        warningsVisible,
-        activePhenomena: Array.from(activePhenomena || []),
+        activePhenomena,
         latitude: getState(StateKeys.LAT),
         longitude: getState(StateKeys.LON),
         zoom: getState(StateKeys.ZOOM),
@@ -28,7 +22,11 @@ export function loadState() {
         try {
             const state = JSON.parse(savedState);
             // Reconstitute the Set from the array
-            state.activePhenomena = new Set(state.activePhenomena || []);
+            if (state?.activePhenomena && Array.isArray(state.activePhenomena)) {
+                state.activePhenomena = new Set(state.activePhenomena);
+            } else {
+                state.activePhenomena = new Set();
+            }
             
             // Convert ISO string back to Date if it exists
             if (state.currentTime) {

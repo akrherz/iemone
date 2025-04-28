@@ -10,7 +10,7 @@ import { subscribeToCurrentTime, getCurrentTime } from './stateManager';
 import { saveState } from './statePersistence';
 
 let warningsLayer = null;
-let activePhenomenaSignificance = new Set([
+const activePhenomenaSignificance = new Set([
     "TO.W", "SV.W", "FF.W", "FL.W", "MA.W", 
     "DS.W", "SQ.W", "EW.W", "FL.Y", "FA.Y", "DS.Y"
 ]);
@@ -40,13 +40,11 @@ function getWarningURL(time) {
 
 }
 
-export function createWarningsLayer(map, tableElement, initialState = null) {
-    if (initialState?.activePhenomena) {
-        activePhenomenaSignificance = initialState.activePhenomena;
-    }
+export function getActivePhenomenaSignificance() {
+    return activePhenomenaSignificance;
+}
 
-    // Make activePhenomenaSignificance available globally for state persistence
-    window.activePhenomenaSignificance = activePhenomenaSignificance;
+export function createWarningsLayer(map, tableElement) {
 
     const geojsonSource = new VectorSource({
         format: new GeoJSON(),
@@ -199,19 +197,9 @@ export function createWarningsLayer(map, tableElement, initialState = null) {
     if (warningsLayerToggle) {
         warningsLayerToggle.addEventListener('change', (event) => {
             warningsLayer.setVisible(event.target.checked);
-            saveState({
-                radarVisible: document.getElementById('toggle-tms-layer').checked,
-                radarOpacity: parseFloat(document.getElementById('tms-opacity-slider').value),
-                warningsVisible: event.target.checked,
-                activePhenomena: activePhenomenaSignificance
-            });
+            saveState();
         });
 
-        // Initialize from saved state if provided
-        if (initialState) {
-            warningsLayer.setVisible(initialState.warningsVisible);
-            warningsLayerToggle.checked = initialState.warningsVisible;
-        }
     }
 
     const phenomenaToggles = document.querySelectorAll('.phenomena-toggle');
@@ -238,12 +226,7 @@ export function createWarningsLayer(map, tableElement, initialState = null) {
                 event.target.style.background = colorLookup[key] || '';
             }
             warningsLayer.changed();
-            saveState({
-                radarVisible: document.getElementById('toggle-tms-layer').checked,
-                radarOpacity: parseFloat(document.getElementById('tms-opacity-slider').value),
-                warningsVisible: warningsLayerToggle.checked,
-                activePhenomena: activePhenomenaSignificance
-            });
+            saveState();
         });
     });
 
