@@ -10,7 +10,7 @@ import { subscribeToCurrentTime, getCurrentTime } from './stateManager';
 import { saveState } from './statePersistence';
 
 let warningsLayer = null;
-let activePhenomenaSignificance = new Set([
+const activePhenomenaSignificance = new Set([
     "TO.W", "SV.W", "FF.W", "FL.W", "MA.W", 
     "DS.W", "SQ.W", "EW.W", "FL.Y", "FA.Y", "DS.Y"
 ]);
