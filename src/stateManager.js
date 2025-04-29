@@ -20,6 +20,18 @@ const subscribers = {};
 
 let realtimeInterval = null;
 
+function handleVisibilityChange() {
+    if (document.visibilityState === 'visible' && state[StateKeys.IS_REALTIME]) {
+        // Immediately update the time when tab becomes visible
+        setState(StateKeys.CURRENT_TIME, new Date());
+        // Restart the interval to ensure it's in sync
+        startRealtimeInterval();
+    }
+}
+
+// Add visibility change listener
+document.addEventListener('visibilitychange', handleVisibilityChange);
+
 function startRealtimeInterval() {
     if (realtimeInterval) {
         clearInterval(realtimeInterval);
