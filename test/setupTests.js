@@ -28,9 +28,9 @@ beforeEach(() => {
     class MockDate extends RealDate {
         constructor(...args) {
             if (args.length) {
-                return new RealDate(...args);
+                return new RealDate(...args);  // skipcq
             }
-            return FIXED_DATE;
+            return FIXED_DATE; // skipcq
         }
         static now() {
             return FIXED_DATE.getTime();

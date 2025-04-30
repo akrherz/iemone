@@ -14,14 +14,14 @@ const defaultActivePhenomena = new Set([
     "DS.W", "SQ.W", "EW.W", "FL.Y", "FA.Y", "DS.Y"
 ]);
 
-const savedState = loadState();
+const sstate = loadState();
 const state = {
-    [StateKeys.CURRENT_TIME]: savedState?.currentTime ? new Date(savedState.currentTime) : new Date(),
-    [StateKeys.IS_REALTIME]: savedState?.isRealtime ?? true,
-    [StateKeys.LAT]: savedState?.latitude ?? 39.8283,
-    [StateKeys.LON]: savedState?.longitude ?? -98.5795,
-    [StateKeys.ZOOM]: savedState?.zoom ?? 4.0,
-    [StateKeys.ACTIVE_PHENOMENA]: savedState?.activePhenomena ?? new Set(defaultActivePhenomena)
+    [StateKeys.CURRENT_TIME]: sstate?.currentTime ? new Date(sstate.currentTime) : new Date(),
+    [StateKeys.IS_REALTIME]: sstate?.isRealtime ?? true,
+    [StateKeys.LAT]: sstate?.latitude ?? 39.8283,
+    [StateKeys.LON]: sstate?.longitude ?? -98.5795,
+    [StateKeys.ZOOM]: sstate?.zoom ?? 4.0,
+    [StateKeys.ACTIVE_PHENOMENA]: sstate?.activePhenomena ?? new Set(defaultActivePhenomena)
 };
 const subscribers = {};
 
@@ -160,34 +160,34 @@ export function loadState() {
     const savedState = localStorage.getItem(STATE_KEY);
     if (savedState) {
         try {
-            const state = JSON.parse(savedState);
+            const lstate = JSON.parse(savedState);
             // Reconstitute the Set from the array
-            if (state?.activePhenomena && Array.isArray(state.activePhenomena) && state.activePhenomena.length > 0) {
-                state.activePhenomena = new Set(state.activePhenomena);
+            if (lstate?.activePhenomena && Array.isArray(lstate.activePhenomena) && lstate.activePhenomena.length > 0) {
+                lstate.activePhenomena = new Set(lstate.activePhenomena);
             } else {
-                state.activePhenomena = new Set(defaultActivePhenomena);
+                lstate.activePhenomena = new Set(defaultActivePhenomena);
             }
 
             // Convert ISO string back to Date if it exists
-            if (state.currentTime) {
-                const parsedDate = new Date(state.currentTime);
+            if (lstate.currentTime) {
+                const parsedDate = new Date(lstate.currentTime);
                 if (isNaN(parsedDate.getTime())) {
                     // Invalid date string, switch to realtime mode
-                    state.currentTime = new Date();
-                    state.isRealtime = true;
+                    lstate.currentTime = new Date();
+                    lstate.isRealtime = true;
                 } else {
-                    state.currentTime = parsedDate;
+                    lstate.currentTime = parsedDate;
                 }
             }
 
             // Ensure isRealtime has a boolean value
-            state.isRealtime = state.isRealtime ?? true;
+            lstate.isRealtime = lstate.isRealtime ?? true;
 
             // If isRealtime, then set the currentTime to now
-            if (state.isRealtime) {
-                state.currentTime = new Date();
+            if (lstate.isRealtime) {
+                lstate.currentTime = new Date();
             }
-            return state;
+            return lstate;
         } catch (e) {
             console.error('Failed to parse saved state:', e);
             return null;
