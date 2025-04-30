@@ -1,4 +1,4 @@
-import { getCurrentTime, getIsRealTime, subscribeToRealTime, subscribeToCurrentTime } from "./stateManager";
+import { getCurrentTime, getIsRealTime, subscribeToRealTime, subscribeToCurrentTime } from "./state";
 import { rectifyToFiveMinutes } from "./utils";
 
 export function updateAnimationBranding(radarTime) {

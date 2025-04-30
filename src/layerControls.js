@@ -1,4 +1,4 @@
-import { saveState } from './statePersistence';
+import { saveState } from './state';
 
 function saveLayerState() {
     saveState();

@@ -1,7 +1,6 @@
 import { updateRadarTMSLayer, resetRadarTMSLayer } from './radarTMSLayer';
-import { getCurrentTime, setCurrentTime, setIsRealTime, getIsRealTime, subscribeToCurrentTime, subscribeToRealTime } from './stateManager';
+import { saveState, getCurrentTime, setCurrentTime, setIsRealTime, getIsRealTime, subscribeToCurrentTime, subscribeToRealTime } from './state';
 import { updateAnimationBranding, updateBrandingOverlay } from './brandingOverlay';
-import { saveState } from './statePersistence';
 
 let timeInput = null;
 let animationInterval = null;

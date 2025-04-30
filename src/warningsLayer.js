@@ -6,15 +6,9 @@ import { Stroke, Style } from 'ol/style';
 
 import { showToaster } from './toaster';
 import { formatTimestampToUTC } from './utils';
-import { subscribeToCurrentTime, getCurrentTime } from './stateManager';
-import { saveState } from './statePersistence';
+import { subscribeToCurrentTime, getCurrentTime, saveState, getActivePhenomena, toggleActivePhenomenon } from './state';
 
 let warningsLayer = null;
-const activePhenomenaSignificance = new Set([
-    "TO.W", "SV.W", "FF.W", "FL.W", "MA.W", 
-    "DS.W", "SQ.W", "EW.W", "FL.Y", "FA.Y", "DS.Y"
-]);
-
 const colorLookup = {
     "TO.W": "#FF0000",  // Red
     "SV.W": "#FFA500",  // Orange
@@ -41,7 +35,7 @@ function getWarningURL(time) {
 }
 
 export function getActivePhenomenaSignificance() {
-    return activePhenomenaSignificance;
+    return getActivePhenomena();
 }
 
 export function createWarningsLayer(map, tableElement) {
@@ -58,7 +52,7 @@ export function createWarningsLayer(map, tableElement) {
             const significance = feature.get('significance');
             const key = `${phenomena}.${significance}`;
 
-            if (!activePhenomenaSignificance.has(key)) {
+            if (!getActivePhenomena().has(key)) {
                 return null;
             }
 
@@ -153,7 +147,7 @@ export function createWarningsLayer(map, tableElement) {
 
             phenomenaSignificanceCounts[key] = (phenomenaSignificanceCounts[key] || 0) + 1;
 
-            if (!activePhenomenaSignificance.has(key)) {
+            if (!getActivePhenomena().has(key)) {
                 return;
             }
 
@@ -206,8 +200,8 @@ export function createWarningsLayer(map, tableElement) {
     phenomenaToggles.forEach((toggle) => {
         const key = toggle.dataset.key;
         
-        // Initialize toggle button state based on activePhenomenaSignificance
-        if (!activePhenomenaSignificance.has(key)) {
+        // Initialize toggle button state based on active phenomena
+        if (!getActivePhenomena().has(key)) {
             toggle.classList.remove('active');
             toggle.style.background = '#ccc';
         } else {
@@ -216,15 +210,9 @@ export function createWarningsLayer(map, tableElement) {
         }
 
         toggle.addEventListener('click', (event) => {
-            if (activePhenomenaSignificance.has(key)) {
-                activePhenomenaSignificance.delete(key);
-                event.target.classList.remove('active');
-                event.target.style.background = '#ccc';
-            } else {
-                activePhenomenaSignificance.add(key);
-                event.target.classList.add('active');
-                event.target.style.background = colorLookup[key] || '';
-            }
+            const isActive = toggleActivePhenomenon(key);
+            event.target.classList.toggle('active', isActive);
+            event.target.style.background = isActive ? (colorLookup[key] || '') : '#ccc';
             warningsLayer.changed();
             saveState();
         });

@@ -1,7 +1,7 @@
 import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
 import { formatTimestampToUTC, rectifyToFiveMinutes } from './utils';
-import { getCurrentTime, subscribeToCurrentTime } from './stateManager';
+import { getCurrentTime, subscribeToCurrentTime } from './state';
 
 const SERVICE = "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/";
 let radarTMSLayer = null;

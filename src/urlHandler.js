@@ -1,5 +1,5 @@
 // Handles things with the URL
-import { getCurrentTime, setCurrentTime, subscribeToState, setState, StateKeys } from './stateManager';
+import { getCurrentTime, setCurrentTime, subscribeToState, setState, StateKeys } from './state';
 import { formatTimestampToUTC } from './utils';
 
 function getQueryParams() {
