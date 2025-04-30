@@ -3,8 +3,7 @@ import { OSM } from 'ol/source';
 import View from 'ol/View';
 import { toLonLat, fromLonLat } from 'ol/proj';
 import Tile from 'ol/layer/Tile';
-import { getState, setState, StateKeys } from './stateManager';
-import { saveState } from './statePersistence';
+import { getState, setState, StateKeys, saveState } from './state';
 
 export function initializeMap() {
     const defaultCenter = [getState(StateKeys.LON), getState(StateKeys.LAT)];

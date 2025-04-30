@@ -1,6 +1,6 @@
-module.exports = [
+export default [
     {
-        files: ["**/*.js"],
+        files: ["src/*.js"],
         languageOptions: {
             globals: {
                 "$": false,
