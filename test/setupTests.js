@@ -8,6 +8,9 @@ beforeEach(() => {
         setItem: jest.fn((key, value) => {
             store[key] = value.toString();
         }),
+        removeItem: jest.fn(key => {
+            delete store[key];
+        }),
         clear: jest.fn(() => {
             Object.keys(store).forEach(key => {
                 delete store[key];
@@ -29,7 +32,9 @@ beforeEach(() => {
             }
             return FIXED_DATE;
         }
+        static now() {
+            return FIXED_DATE.getTime();
+        }
     }
-    MockDate.now = () => FIXED_DATE.getTime();
     global.Date = MockDate;
 });

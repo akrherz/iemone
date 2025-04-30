@@ -170,7 +170,14 @@ export function loadState() {
 
             // Convert ISO string back to Date if it exists
             if (state.currentTime) {
-                state.currentTime = new Date(state.currentTime);
+                const parsedDate = new Date(state.currentTime);
+                if (isNaN(parsedDate.getTime())) {
+                    // Invalid date string, switch to realtime mode
+                    state.currentTime = new Date();
+                    state.isRealtime = true;
+                } else {
+                    state.currentTime = parsedDate;
+                }
             }
 
             // Ensure isRealtime has a boolean value
