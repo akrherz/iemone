@@ -4,7 +4,7 @@ function saveLayerState() {
     saveState();
 }
 
-export function setupLayerControls(radarTMSLayer) {
+export function setupLayerControls(radarTMSLayer, spsLayer) {
     const layersToggle = document.getElementById('layers-toggle');
     const layerControl = document.getElementById('layer-control');
     const closeLayersButton = document.getElementById('close-layers');
@@ -24,6 +24,7 @@ export function setupLayerControls(radarTMSLayer) {
 
     const tmsLayerToggle = document.getElementById('toggle-tms-layer');
     const tmsOpacitySlider = document.getElementById('tms-opacity-slider');
+    const spsLayerToggle = document.getElementById('toggle-sps-layer');
 
     if (tmsLayerToggle) {
         tmsLayerToggle.addEventListener('change', (event) => {
@@ -33,6 +34,16 @@ export function setupLayerControls(radarTMSLayer) {
 
         // Initialize the TMS layer visibility
         radarTMSLayer.setVisible(tmsLayerToggle.checked);
+    }
+
+    if (spsLayerToggle) {
+        spsLayerToggle.addEventListener('change', (event) => {
+            spsLayer.setVisible(event.target.checked);
+            saveLayerState();
+        });
+
+        // Initialize the SPS layer visibility
+        spsLayer.setVisible(spsLayerToggle.checked);
     }
 
     if (tmsOpacitySlider) {
