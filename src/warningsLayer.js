@@ -34,8 +34,38 @@ function getWarningURL(time) {
 
 }
 
+function formatTimestamp(date) {
+    const options = {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+        timeZoneName: 'short'
+    };
+    return date.toLocaleString(undefined, options);
+}
+
 export function getActivePhenomenaSignificance() {
     return getActivePhenomena();
+}
+
+export function createWarningPopup(feature, popupElement) {
+    const issueUTC = new Date(feature.get('issue'));
+    const expireUTC = new Date(feature.get('expire_utc'));
+
+    const issueLocal = formatTimestamp(issueUTC);
+    const expireLocal = formatTimestamp(expireUTC);
+
+    popupElement.innerHTML = `
+        <strong>WFO:</strong> ${feature.get('wfo')}<br>
+        <strong>Event:</strong> ${feature.get('ps')} ${feature.get('eventid')}<br>
+        <strong>Issue:</strong> ${issueLocal} (${issueUTC.toISOString().slice(11, 16)} UTC)<br>
+        <strong>Expires:</strong> ${expireLocal} (${expireUTC.toISOString().slice(11, 16)} UTC)<br>
+        <a href="${feature.get('href')}" target="_new">VTEC App Link</a>
+    `;
+    return true;
 }
 
 export function createWarningsLayer(map, tableElement) {
@@ -97,38 +127,17 @@ export function createWarningsLayer(map, tableElement) {
     });
     map.addOverlay(popupOverlay);
 
-    function formatTimestamp(date) {
-        const options = {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true,
-            timeZoneName: 'short'
-        };
-        return date.toLocaleString(undefined, options);
-    }
-
     map.on('singleclick', (event) => {
         const features = map.getFeaturesAtPixel(event.pixel);
         if (features && features.length > 0) {
             const feature = features[0];
-            const issueUTC = new Date(feature.get('issue'));
-            const expireUTC = new Date(feature.get('expire_utc'));
-
-            const issueLocal = formatTimestamp(issueUTC);
-            const expireLocal = formatTimestamp(expireUTC);
-
-            popupElement.innerHTML = `
-                <strong>WFO:</strong> ${feature.get('wfo')}<br>
-                <strong>Event:</strong> ${feature.get('ps')} ${feature.get('eventid')}<br>
-                <strong>Issue:</strong> ${issueLocal} (${issueUTC.toISOString().slice(11, 16)} UTC)<br>
-                <strong>Expires:</strong> ${expireLocal} (${expireUTC.toISOString().slice(11, 16)} UTC)<br>
-                <a href="${feature.get('href')}" target="_new">VTEC App Link</a>
-            `;
-            popupElement.style.display = 'block';
-            popupOverlay.setPosition(event.coordinate);
+            const phenomena = feature.get('phenomena');
+            if (phenomena) {  // Only handle warning features
+                if (createWarningPopup(feature, popupElement)) {
+                    popupElement.style.display = 'block';
+                    popupOverlay.setPosition(event.coordinate);
+                }
+            }
         } else {
             popupElement.style.display = 'none';
         }

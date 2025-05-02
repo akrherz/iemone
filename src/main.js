@@ -1,6 +1,7 @@
 import './style.css';
 import { initializeMap } from './map';
 import { createWarningsLayer } from './warningsLayer';
+import { createSPSLayer } from './spsLayer';
 import { setupWarningsTable } from './warningsTable';
 import { createRadarTMSLayer } from './radarTMSLayer';
 import { initializeURLHandler } from './urlHandler';
@@ -18,12 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const map = initializeMap();
     const radarTMSLayer = createRadarTMSLayer(map);
     const tableElement = document.getElementById('warnings-table');
+    const spsLayer = createSPSLayer(map);
     const warningsLayer = createWarningsLayer(map, tableElement);
 
     // Setup UI components that depend on state
     setupTimeInputControl();
     setupWarningsTable(tableElement, warningsLayer);
     setupWarningsModal();
-    setupLayerControls(radarTMSLayer);
+    setupLayerControls(radarTMSLayer, spsLayer);
     initBrandingOverlay();
 });

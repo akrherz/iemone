@@ -683,6 +683,23 @@ html, body {
     border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
+.layer-section .phenomena-toggles {
+    margin-top: 10px;
+    margin-left: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.layer-section .phenomena-group {
+    width: 100%;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    color: #444;
+    font-weight: bold;
+    font-size: 13px;
+}
+
 .layer-toggle {
     display: flex;
     align-items: center;
@@ -805,4 +822,10 @@ html, body {
     padding: 8px;
     background: rgba(0, 0, 0, 0.7);
     border-radius: 6px;
+}
+
+.drawer-content {
+    padding: 15px;
+    overflow-y: auto; /* Enable vertical scrolling */
+    flex: 1; /* Take up remaining space */
 }
