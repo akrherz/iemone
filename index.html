@@ -21,8 +21,9 @@
 <div class="control-toggle-group">
     <button class="control-toggle-button" id="layers-toggle" title="Toggle Layer Controls">☰</button>
     <button class="control-toggle-button" id="warnings-toggle" title="Toggle Warnings">⚠</button>
-    <button class="control-toggle-button" id="exit-button" title="Return to Home"
-    onclick="window.location.href='/'">⌂</button>
+    <button class="control-toggle-button" id="help-toggle" title="Help and Information">?</button>
+    <button class="control-toggle-button" id="exit-button" title="Exit IEM One"
+    onclick="window.location.href='/'">⤶</button>
 </div>
 
 <div id="time-control" class="time-control">
@@ -147,6 +148,41 @@
     </div>
     <button id="collapse-warnings" style="display: none;">Collapse</button> <!-- Collapse button -->
 </div>
+<div id="help-modal">
+    <div id="help-modal-header">
+        Help & Information
+        <button id="close-help">✖</button>
+    </div>
+    <div id="help-modal-content">
+        <h3>About IEM One</h3>
+        <p>IEM One is an interactive weather data visualization tool that provides
+        access to radar imagery and weather warnings.</p>
+
+        <p><a href="/">Exit to IEM Homepage</a></p>
+
+        <h3>Recent Changes</h3>
+        <ul>
+            <li><strong>19 May 2025</strong>: Added this help page.</li>
+        </ul>
+
+        <h3>Features</h3>
+        <ul>
+            <li><strong>Mode Selection:</strong> Choose between Real-time and Archive modes</li>
+            <li><strong>Time Navigation:</strong> Use arrow buttons or input field to navigate through time</li>
+            <li><strong>Layer Controls (☰):</strong> Toggle radar and warning layers</li>
+            <li><strong>Warnings Panel (⚠):</strong> View active weather warnings</li>
+        </ul>
+
+        <h3>Controls</h3>
+        <ul>
+            <li><strong>Time Controls:</strong> Located at the bottom of the screen</li>
+            <li><strong>Layer Toggle:</strong> Click ☰ to show/hide layer controls</li>
+            <li><strong>Warning Toggle:</strong> Click ⚠ to show/hide active warnings</li>
+            <li><strong>Exit:</strong> Click ⤶ to exit IEM One</li>
+        </ul>
+    </div>
+</div>
+
 <div id="toaster">Timestamp updated!</div> <!-- Placed at the end of the document so the pages load faster -->
 <script type="module" src="src/main.js"></script>
 </body>
