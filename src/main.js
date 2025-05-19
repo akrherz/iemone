@@ -9,6 +9,7 @@ import { setupWarningsModal } from './warningsModal';
 import { setupTimeInputControl } from './timeInputControl';
 import { setupLayerControls } from './layerControls';
 import { initBrandingOverlay } from './brandingOverlay';
+import { setupHelpModal } from './helpModal';
 
 document.addEventListener('DOMContentLoaded', () => {
     // The state manager should already be initialized by this point
@@ -27,5 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupWarningsTable(tableElement, warningsLayer);
     setupWarningsModal();
     setupLayerControls(radarTMSLayer, spsLayer);
+    setupHelpModal();
     initBrandingOverlay();
 });
