@@ -6,6 +6,11 @@ import { getCurrentTime, subscribeToCurrentTime } from './state';
 const SERVICE = "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/";
 let radarTMSLayer = null;
 
+/**
+ * 
+ * @param {Date} time 
+ * @returns 
+ */
 function getRadarURL(time) {
     // Always rectify the timestamp for radar requests
     const rectifiedTime = rectifyToFiveMinutes(time);

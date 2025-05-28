@@ -1,15 +1,31 @@
-export default [
+const js = require("@eslint/js");
+const globals = require("globals");
+
+module.exports = [
     {
-        files: ["src/*.js"],
-        languageOptions: {
+        ignores: ["test/**", "dist/**"]
+    },
+    js.configs.recommended,
+    {
+        files: ["**/*.js"],
+        languageOptions:{
+            ecmaVersion: "latest",
+            sourceType: "module",
             globals: {
-                "$": false,
-                "jQuery": false,
-                "ol": false,
-                "iemdata": false,
-                "moment": false,
-                "google": false
+                ...globals.browser,
+                ...globals.node
             }
+        }
+    },
+    {
+        rules: {
+            "curly": ["error", "all"],
+            "dot-notation": "error",
+            "eqeqeq": "error",
+            "no-eval": "error",
+            "no-var": "error",
+            "prefer-const": "error",
+            "semi": "error"
         }
     }
 ];

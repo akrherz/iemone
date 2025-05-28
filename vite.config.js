@@ -3,4 +3,4 @@ export default {
     sourcemap: true,
   },
   base: '/one/',
-}
+};

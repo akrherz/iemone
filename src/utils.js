@@ -1,3 +1,8 @@
+/**
+ * Formatter
+ * @param {Date} date 
+ * @returns 
+ */
 export function formatTimestampToUTC(date) {
     const year = date.getUTCFullYear();
     const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
@@ -7,6 +12,11 @@ export function formatTimestampToUTC(date) {
     return `${year}${month}${day}${hours}${minutes}`;
 }
 
+/**
+ * Round down to the nearest minute modulo 5
+ * @param {Date} date 
+ * @returns 
+ */
 export function rectifyToFiveMinutes(date) {
     const rectifiedDate = new Date(date.getTime());
     const minutes = rectifiedDate.getUTCMinutes();
