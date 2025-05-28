@@ -23,4 +23,4 @@ export default {
     '/test/'
   ],
   moduleFileExtensions: ['js', 'mjs']
-}
+};

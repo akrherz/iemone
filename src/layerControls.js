@@ -1,58 +1,57 @@
 import { saveState } from './state';
+import { requireElement, requireInputElement } from './domUtils.js';
 
 function saveLayerState() {
     saveState();
 }
 
 export function setupLayerControls(radarTMSLayer, spsLayer) {
-    const layersToggle = document.getElementById('layers-toggle');
-    const layerControl = document.getElementById('layer-control');
-    const closeLayersButton = document.getElementById('close-layers');
+    const layersToggle = requireElement('layers-toggle');
+    const layerControl = requireElement('layer-control');
+    const closeLayersButton = requireElement('close-layers');
 
-    if (layersToggle && layerControl) {
-        layersToggle.addEventListener('click', () => {
-            layerControl.classList.toggle('open');
-        });
+    layersToggle.addEventListener('click', () => {
+        layerControl.classList.toggle('open');
+    });
 
-        // Add close button functionality
-        if (closeLayersButton) {
-            closeLayersButton.addEventListener('click', () => {
-                layerControl.classList.remove('open');
-            });
+    closeLayersButton.addEventListener('click', () => {
+        layerControl.classList.remove('open');
+    });
+
+    const tmsLayerToggle = requireInputElement('toggle-tms-layer');
+    const tmsOpacitySlider = requireInputElement('tms-opacity-slider');
+    const spsLayerToggle = requireInputElement('toggle-sps-layer');
+
+    tmsLayerToggle.addEventListener('change', (event) => {
+        const target = event.target;
+        if (target instanceof HTMLInputElement) {
+            radarTMSLayer.setVisible(target.checked);
         }
-    }
+        saveLayerState();
+    });
 
-    const tmsLayerToggle = document.getElementById('toggle-tms-layer');
-    const tmsOpacitySlider = document.getElementById('tms-opacity-slider');
-    const spsLayerToggle = document.getElementById('toggle-sps-layer');
+    // Initialize the TMS layer visibility
+    radarTMSLayer.setVisible(tmsLayerToggle.checked);
 
-    if (tmsLayerToggle) {
-        tmsLayerToggle.addEventListener('change', (event) => {
-            radarTMSLayer.setVisible(event.target.checked);
-            saveLayerState();
-        });
+    spsLayerToggle.addEventListener('change', (event) => {
+        const target = event.target;
+        if (target instanceof HTMLInputElement) {
+            spsLayer.setVisible(target.checked);
+        }
+        saveLayerState();
+    });
 
-        // Initialize the TMS layer visibility
-        radarTMSLayer.setVisible(tmsLayerToggle.checked);
-    }
+    // Initialize the SPS layer visibility
+    spsLayer.setVisible(spsLayerToggle.checked);
 
-    if (spsLayerToggle) {
-        spsLayerToggle.addEventListener('change', (event) => {
-            spsLayer.setVisible(event.target.checked);
-            saveLayerState();
-        });
+    tmsOpacitySlider.addEventListener('input', (event) => {
+        const target = event.target;
+        if (target instanceof HTMLInputElement) {
+            radarTMSLayer.setOpacity(parseFloat(target.value));
+        }
+        saveLayerState();
+    });
 
-        // Initialize the SPS layer visibility
-        spsLayer.setVisible(spsLayerToggle.checked);
-    }
-
-    if (tmsOpacitySlider) {
-        tmsOpacitySlider.addEventListener('input', (event) => {
-            radarTMSLayer.setOpacity(parseFloat(event.target.value));
-            saveLayerState();
-        });
-
-        // Initialize the TMS layer opacity
-        radarTMSLayer.setOpacity(parseFloat(tmsOpacitySlider.value));
-    }
+    // Initialize the TMS layer opacity
+    radarTMSLayer.setOpacity(parseFloat(tmsOpacitySlider.value));
 }

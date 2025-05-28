@@ -1,10 +1,10 @@
 import { getCurrentTime, getIsRealTime, subscribeToRealTime, subscribeToCurrentTime } from "./state";
 import { rectifyToFiveMinutes } from "./utils";
 import strftime from "strftime";
+import { requireElement } from "./domUtils";
 
 export function updateAnimationBranding(radarTime) {
-    const brandingOverlay = document.getElementById('branding-overlay');
-    if (!brandingOverlay) return;
+    const brandingOverlay = requireElement('branding-overlay');
     
     const localRadarTime = strftime('%H:%M', rectifyToFiveMinutes(radarTime));
     const currentTime = getCurrentTime();
@@ -16,10 +16,7 @@ export function updateAnimationBranding(radarTime) {
 
 export function updateBrandingOverlay() {
     const isRealTime = getIsRealTime();
-    const brandingOverlay = document.getElementById('branding-overlay');
-    if (!brandingOverlay) {
-        return;
-    }
+    const brandingOverlay = requireElement('branding-overlay');
     const currentTime = getCurrentTime();
     const radarTime = rectifyToFiveMinutes(currentTime);
     const localWarningsTime = strftime('%H:%M', currentTime);
@@ -34,7 +31,7 @@ export function initBrandingOverlay() {
     subscribeToRealTime(() => {
         updateBrandingOverlay();
     });
-    subscribeToCurrentTime((_currentTime) => {
+    subscribeToCurrentTime(() => {
         updateBrandingOverlay();
     });
     updateBrandingOverlay();

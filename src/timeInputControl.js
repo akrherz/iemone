@@ -2,22 +2,25 @@ import { updateRadarTMSLayer, resetRadarTMSLayer } from './radarTMSLayer';
 import { saveState, getCurrentTime, setCurrentTime, setIsRealTime, getIsRealTime, subscribeToCurrentTime, subscribeToRealTime } from './state';
 import { updateAnimationBranding, updateBrandingOverlay } from './brandingOverlay';
 import strftime from 'strftime';
+import { requireElement, requireButtonElement, requireInputElement } from './domUtils.js';
 
 let timeInput = null;
 let animationInterval = null;
 
 function handleTimeInputChange(event) {
-    if (!timeInput) return;
+    if (!timeInput) {
+        return;
+    }
     setCurrentTime(new Date(event.target.value));
     updateRadarTMSLayer(getCurrentTime());
 }
 
 function toggleAnimation() {
     let progressBar = document.querySelector('#animation-progress .progress');
-    const timePlayPauseButton = document.getElementById('time-play-pause');
+    const timePlayPauseButton = requireElement('time-play-pause');
 
     if (!progressBar) {
-        const progressContainer = document.getElementById('animation-progress');
+        const progressContainer = requireElement('animation-progress');
         progressBar = document.createElement('div');
         progressBar.className = 'progress';
         progressContainer.appendChild(progressBar);
@@ -29,7 +32,9 @@ function toggleAnimation() {
         if (timePlayPauseButton) {
             timePlayPauseButton.textContent = '⏵︎';
         }
-        progressBar.style.width = '0%';
+        if (progressBar instanceof HTMLElement) {
+            progressBar.style.width = '0%';
+        }
         resetRadarTMSLayer(); // Reset radar to match app state
         updateBrandingOverlay(); // Reset branding to normal state
         return;
@@ -51,7 +56,9 @@ function toggleAnimation() {
         now.setMinutes(now.getMinutes() + 5);
         step++;
         const progressPercentage = (step / totalSteps) * 100;
-        progressBar.style.width = `${progressPercentage}%`;
+        if (progressBar instanceof HTMLElement) {
+            progressBar.style.width = `${progressPercentage}%`;
+        }
     }, 1000);
 
     if (timePlayPauseButton) {
@@ -60,7 +67,7 @@ function toggleAnimation() {
 }
 
 export function setupTimeInputControl() {
-    timeInput = document.getElementById('current-time');
+    timeInput = requireElement('current-time');
     
     subscribeToCurrentTime((currentTime) => {
         updateTimeInput(currentTime);
@@ -69,36 +76,40 @@ export function setupTimeInputControl() {
     subscribeToRealTime((isRealtime) => {
         updateUI(isRealtime);
         // Update the radio buttons
-        document.getElementById('realtime-mode').checked = isRealtime;
-        document.getElementById('archive-mode').checked = !isRealtime;
+        requireInputElement('realtime-mode').checked = isRealtime;
+        requireInputElement('archive-mode').checked = !isRealtime;
         // Update branding overlay
-        const brandingOverlay = document.getElementById('branding-overlay');
-        if (brandingOverlay) {
-            brandingOverlay.textContent = `IEM1: ${isRealtime ? 'Real-time' : 'Archive'}`;
-            brandingOverlay.dataset.mode = isRealtime ? 'realtime' : 'archive';
-        }
+        const brandingOverlay = requireElement('branding-overlay');
+        brandingOverlay.textContent = `IEM1: ${isRealtime ? 'Real-time' : 'Archive'}`;
+        brandingOverlay.dataset.mode = isRealtime ? 'realtime' : 'archive';
     });
 
     timeInput.addEventListener('change', handleTimeInputChange);
 
-    const timeStepBackwardButton = document.getElementById('time-step-backward');
-    const timePlayPauseButton = document.getElementById('time-play-pause');
-    const timeStepForwardButton = document.getElementById('time-step-forward');
+    const timeStepBackwardButton = requireButtonElement('time-step-backward');
+    const timePlayPauseButton = requireButtonElement('time-play-pause');
+    const timeStepForwardButton = requireButtonElement('time-step-forward');
 
     // Set up radio button event listeners
-    const realtimeMode = document.getElementById('realtime-mode');
-    const archiveMode = document.getElementById('archive-mode');
+    const realtimeMode = requireInputElement('realtime-mode');
+    const archiveMode = requireInputElement('archive-mode');
     const isRealtime = getIsRealTime();
 
     realtimeMode.checked = isRealtime;
     archiveMode.checked = !isRealtime;
 
     realtimeMode.addEventListener('change', (e) => {
-        setIsRealTime(e.target.checked);
+        const target = e.target;
+        if (target instanceof HTMLInputElement) {
+            setIsRealTime(target.checked);
+        }
         saveState();
     });
     archiveMode.addEventListener('change', (e) => {
-        setIsRealTime(!e.target.checked);
+        const target = e.target;
+        if (target instanceof HTMLInputElement) {
+            setIsRealTime(!target.checked);
+        }
         saveState();
     });
 
@@ -125,9 +136,9 @@ function stepTime(minutes) {
 }
 
 function updateUI(isRealtime) {
-    const timeStepBackwardButton = document.getElementById('time-step-backward');
-    const timeStepForwardButton = document.getElementById('time-step-forward');
-    const timePlayPauseButton = document.getElementById('time-play-pause');
+    const timeStepBackwardButton = requireButtonElement('time-step-backward');
+    const timeStepForwardButton = requireButtonElement('time-step-forward');
+    const timePlayPauseButton = requireButtonElement('time-play-pause');
 
     if (!isRealtime) {
         timeInput.disabled = false;

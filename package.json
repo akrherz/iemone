@@ -1,14 +1,15 @@
 {
   "name": "iemone",
   "version": "1.0.0",
-  "type": "module",
   "scripts": {
     "start": "vite",
     "build": "vite build",
     "serve": "vite preview",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix"
   },
   "devDependencies": {
     "@babel/core": "^7.27.1",
@@ -21,6 +22,9 @@
     "vite": "^6.3.5"
   },
   "dependencies": {
+    "eslint": "^9.27.0",
+    "eslint-js": "github:eslint/js",
+    "globals": "^16.2.0",
     "ol": "latest",
     "strftime": "^0.10.3"
   }

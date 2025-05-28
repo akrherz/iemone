@@ -1,68 +1,65 @@
+import { requireElement } from './domUtils.js';
+
 export function setupWarningsModal() {
-    const warningsToggle = document.getElementById('warnings-toggle');
-    const warningsModal = document.getElementById('warnings-modal');
-    const warningsModalContent = document.getElementById('warnings-modal-content');
-    const closeWarningsButton = document.getElementById('close-warnings');
-    const collapseWarningsButton = document.getElementById('collapse-warnings');
-    const searchInput = document.getElementById('warnings-search');
+    const warningsToggle = requireElement('warnings-toggle');
+    const warningsModal = requireElement('warnings-modal');
+    const warningsModalContent = requireElement('warnings-modal-content');
+    const closeWarningsButton = requireElement('close-warnings');
+    const collapseWarningsButton = requireElement('collapse-warnings');
+    const searchInput = requireElement('warnings-search');
 
-    if (warningsToggle && warningsModal) {
-        // Toggle warnings modal visibility
-        warningsToggle.addEventListener('click', () => {
-            warningsModal.classList.toggle('open');
-        });
+    // Toggle warnings modal visibility
+    warningsToggle.addEventListener('click', () => {
+        warningsModal.classList.toggle('open');
+    });
 
-        // Collapse button functionality
-        if (collapseWarningsButton) {
-            collapseWarningsButton.style.display = window.innerWidth <= 768 ? 'block' : 'none';
-            collapseWarningsButton.addEventListener('click', () => {
-                warningsModal.classList.remove('open');
-            });
-        }
+    collapseWarningsButton.style.display =
+        window.innerWidth <= 768 ? 'block' : 'none';
+    collapseWarningsButton.addEventListener('click', () => {
+        warningsModal.classList.remove('open');
+    });
 
-        // Close button functionality
-        if (closeWarningsButton) {
-            closeWarningsButton.addEventListener('click', () => {
-                warningsModal.classList.remove('open');
-            });
-        }
-    }
+    closeWarningsButton.addEventListener('click', () => {
+        warningsModal.classList.remove('open');
+    });
 
     // Make modal draggable
     let isDragging = false;
     let offsetX = 0;
     let offsetY = 0;
 
-    if (warningsModalContent) {
-        warningsModalContent.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            offsetX = e.clientX - warningsModal.offsetLeft;
-            offsetY = e.clientY - warningsModal.offsetTop;
-            warningsModal.style.transition = 'none'; // Disable transition during drag
-        });
+    warningsModalContent.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offsetX = e.clientX - warningsModal.offsetLeft;
+        offsetY = e.clientY - warningsModal.offsetTop;
+        warningsModal.style.transition = 'none'; // Disable transition during drag
+    });
 
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                warningsModal.style.left = `${e.clientX - offsetX}px`;
-                warningsModal.style.top = `${e.clientY - offsetY}px`;
-            }
-        });
+    document.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            warningsModal.style.left = `${e.clientX - offsetX}px`;
+            warningsModal.style.top = `${e.clientY - offsetY}px`;
+        }
+    });
 
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-            warningsModal.style.transition = ''; // Re-enable transition
-        });
-    }
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+        warningsModal.style.transition = ''; // Re-enable transition
+    });
 
     // Add search functionality for warnings table
-    if (searchInput) {
-        searchInput.addEventListener('input', (event) => {
-            const filter = event.target.value.toLowerCase();
+    searchInput.addEventListener('input', (event) => {
+        const target = event.target;
+        if (target instanceof HTMLInputElement) {
+            const filter = target.value.toLowerCase();
             const rows = document.querySelectorAll('#warnings-table tbody tr');
             rows.forEach((row) => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(filter) ? '' : 'none';
-            });
+                const text = row.textContent?.toLowerCase();
+                if (text  && row instanceof HTMLTableRowElement) {
+                    row.style.display = text.includes(filter) ? '' : 'none';
+                }
         });
-    }
+
+        }
+    });
 }

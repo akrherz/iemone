@@ -74,7 +74,7 @@ export function createWarningsLayer(map, tableElement) {
             const key = `${phenomena}.${significance}`;
 
             if (!getActivePhenomena().has(key)) {
-                return null;
+                return [];
             }
 
             const color = colorLookup[key] || 'gray';
@@ -168,13 +168,15 @@ export function createWarningsLayer(map, tableElement) {
 
         const phenomenaToggles = document.querySelectorAll('.phenomena-toggle');
         phenomenaToggles.forEach((toggle) => {
-            const key = toggle.dataset.key;
-            if (key) {
-                const count = phenomenaSignificanceCounts[key] || 0;
-                const countBadge = toggle.querySelector('.count');
-                if (countBadge) {
-                    countBadge.textContent = count;
-                    countBadge.style.display = count > 0 ? 'block' : 'none';
+            if (toggle instanceof HTMLButtonElement) {
+                const key = toggle.dataset.key;
+                if (key) {
+                    const count = phenomenaSignificanceCounts[key] || 0;
+                    const countBadge = toggle.querySelector('.count');
+                    if (countBadge instanceof HTMLElement) {
+                        countBadge.textContent = count;
+                        countBadge.style.display = count > 0 ? 'block' : 'none';
+                    }
                 }
             }
         });
@@ -190,7 +192,10 @@ export function createWarningsLayer(map, tableElement) {
     const warningsLayerToggle = document.getElementById('toggle-warnings-layer');
     if (warningsLayerToggle) {
         warningsLayerToggle.addEventListener('change', (event) => {
-            warningsLayer.setVisible(event.target.checked);
+            const target = event.target;
+            if (target instanceof HTMLInputElement) {
+                warningsLayer.setVisible(target.checked);
+            }
             saveState();
         });
 
@@ -198,6 +203,9 @@ export function createWarningsLayer(map, tableElement) {
 
     const phenomenaToggles = document.querySelectorAll('.phenomena-toggle');
     phenomenaToggles.forEach((toggle) => {
+        if (!(toggle instanceof HTMLButtonElement)) {
+            return;
+        }
         const key = toggle.dataset.key;
         
         // Initialize toggle button state based on active phenomena
@@ -211,8 +219,12 @@ export function createWarningsLayer(map, tableElement) {
 
         toggle.addEventListener('click', (event) => {
             const isActive = toggleActivePhenomenon(key);
-            event.target.classList.toggle('active', isActive);
-            event.target.style.background = isActive ? (colorLookup[key] || '') : '#ccc';
+            const target = event.target;
+            if (!(target instanceof HTMLButtonElement)) {
+                return;
+            }
+            target.classList.toggle('active', isActive);
+            target.style.background = isActive ? (colorLookup[key] || '') : '#ccc';
             warningsLayer.changed();
             saveState();
         });

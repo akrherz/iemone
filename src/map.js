@@ -31,6 +31,9 @@ export function initializeMap() {
 
     map.on('moveend', () => {
         const center = map.getView().getCenter();
+        if (!center) {
+            return;
+        }
         const lonLat = toLonLat(center);
         const zoom = view.getZoom();
 

@@ -51,8 +51,7 @@ export function createSPSLayer(map) {
             stroke: new Stroke({
                 color: '#000000',
                 width: 3
-            }),
-            fill: null
+            })
         })
     });
 
