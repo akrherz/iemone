@@ -1,3 +1,5 @@
+import strftime from 'strftime';
+
 export function setupWarningsTable(tableElement, warningsLayer) {
     function updateTable(features) {
         const tbody = tableElement.querySelector('tbody');
@@ -11,7 +13,7 @@ export function setupWarningsTable(tableElement, warningsLayer) {
 
             const tillCell = document.createElement('td');
             const expireUTC = new Date(feature.get('expire_utc'));
-            tillCell.textContent = `${expireUTC.toLocaleString()}`;
+            tillCell.textContent = strftime("%Y-%m-%d %H:%M", expireUTC);
             row.appendChild(tillCell);
 
             const linkCell = document.createElement('td');
