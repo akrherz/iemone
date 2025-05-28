@@ -1,6 +1,7 @@
 import { updateRadarTMSLayer, resetRadarTMSLayer } from './radarTMSLayer';
 import { saveState, getCurrentTime, setCurrentTime, setIsRealTime, getIsRealTime, subscribeToCurrentTime, subscribeToRealTime } from './state';
 import { updateAnimationBranding, updateBrandingOverlay } from './brandingOverlay';
+import strftime from 'strftime';
 
 let timeInput = null;
 let animationInterval = null;
@@ -110,12 +111,7 @@ export function setupTimeInputControl() {
 
 function updateTimeInput(time) {
     if (timeInput) {
-        const year = time.getFullYear();
-        const month = (time.getMonth() + 1).toString().padStart(2, '0');
-        const day = time.getDate().toString().padStart(2, '0');
-        const hours = time.getHours().toString().padStart(2, '0');
-        const minutes = time.getMinutes().toString().padStart(2, '0');
-        timeInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+        timeInput.value = strftime('%Y-%m-%dT%H:%M', time);
     }
 }
 

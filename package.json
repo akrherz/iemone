@@ -21,6 +21,7 @@
     "vite": "^6.3.5"
   },
   "dependencies": {
-    "ol": "latest"
+    "ol": "latest",
+    "strftime": "^0.10.3"
   }
 }

@@ -3,7 +3,7 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Stroke, Style } from 'ol/style';
-
+import strftime from 'strftime';
 import { showToaster } from './toaster';
 import { formatTimestampToUTC } from './utils';
 import { subscribeToCurrentTime, getCurrentTime, saveState, getActivePhenomena, toggleActivePhenomenon } from './state';
@@ -35,16 +35,7 @@ function getWarningURL(time) {
 }
 
 function formatTimestamp(date) {
-    const options = {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-        timeZoneName: 'short'
-    };
-    return date.toLocaleString(undefined, options);
+    return strftime('%Y-%m-%d %H:%M', date);
 }
 
 export function getActivePhenomenaSignificance() {
