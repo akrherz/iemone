@@ -10,6 +10,7 @@ import { setupTimeInputControl } from './timeInputControl';
 import { setupLayerControls } from './layerControls';
 import { initBrandingOverlay } from './brandingOverlay';
 import { setupHelpModal } from './helpModal';
+import { initializeWebcam } from './webcamManager';
 
 document.addEventListener('DOMContentLoaded', () => {
     // The state manager should already be initialized by this point
@@ -22,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tableElement = document.getElementById('warnings-table');
     const spsLayer = createSPSLayer(map);
     const warningsLayer = createWarningsLayer(map, tableElement);
+    initializeWebcam(map);
 
     // Setup UI components that depend on state
     setupTimeInputControl();

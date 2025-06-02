@@ -3,12 +3,14 @@ import { rectifyToFiveMinutes } from "./utils";
 import strftime from "strftime";
 import { requireElement } from "./domUtils";
 
+const FMT = '%-I:%M %p';
+
 export function updateAnimationBranding(radarTime) {
     const brandingOverlay = requireElement('branding-overlay');
     
-    const localRadarTime = strftime('%H:%M', rectifyToFiveMinutes(radarTime));
+    const localRadarTime = strftime(FMT, rectifyToFiveMinutes(radarTime));
     const currentTime = getCurrentTime();
-    const localWarningsTime = strftime('%H:%M', currentTime);
+    const localWarningsTime = strftime(FMT, currentTime);
     
     brandingOverlay.dataset.mode = 'archive';
     brandingOverlay.textContent = `IEM1: Archive (Animating) RADAR: ${localRadarTime} Warnings: ${localWarningsTime}`;
@@ -19,8 +21,8 @@ export function updateBrandingOverlay() {
     const brandingOverlay = requireElement('branding-overlay');
     const currentTime = getCurrentTime();
     const radarTime = rectifyToFiveMinutes(currentTime);
-    const localWarningsTime = strftime('%H:%M', currentTime);
-    const localRadarTime = strftime('%H:%M', radarTime);
+    const localWarningsTime = strftime(FMT, currentTime);
+    const localRadarTime = strftime(FMT, radarTime);
     const localTimeMessage = `RADAR: ${localRadarTime} Warnings: ${localWarningsTime}`;
     brandingOverlay.dataset.mode = isRealTime ? 'realtime' : 'archive';
     const title = `IEM1: ${isRealTime ? 'Realtime' : 'Archive'} ${localTimeMessage}`;
