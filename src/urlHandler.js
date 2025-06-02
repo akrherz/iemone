@@ -1,5 +1,5 @@
 // Handles things with the URL
-import { getCurrentTime, setCurrentTime, subscribeToState, setState, StateKeys } from './state';
+import { getState, getCurrentTime, setCurrentTime, subscribeToState, setState, StateKeys } from './state';
 import { formatTimestampToUTC } from './utils';
 
 function getQueryParams() {
@@ -39,7 +39,12 @@ export function initializeURLHandler() {
 
     // Subscribe to state changes
     subscribeToState(StateKeys.CURRENT_TIME, (currentTime) => {
-        updateQueryParams('timestamp', formatTimestampToUTC(currentTime));
+        const isRealtime = getState(StateKeys.IS_REALTIME);
+        if (isRealtime) {
+            updateQueryParams('timestamp', null);
+        } else {
+            updateQueryParams('timestamp', formatTimestampToUTC(currentTime));
+        }
     });
 
     subscribeToState(StateKeys.IS_REALTIME, (isRealtime) => {
