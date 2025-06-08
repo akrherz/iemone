@@ -1,5 +1,5 @@
 import { saveState } from './state';
-import { requireElement, requireInputElement } from './domUtils.js';
+import { requireElement, requireInputElement } from 'iemjs/domUtils';
 import { getWebcamLayers } from './webcamManager.js';
 
 function saveLayerState() {
