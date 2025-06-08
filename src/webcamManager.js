@@ -3,7 +3,7 @@ import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
 import { Style, Icon } from 'ol/style';
 import { Overlay } from 'ol';
-import { requireElement } from './domUtils.js';
+import { requireElement } from 'iemjs/domUtils';
 import { getState, StateKeys } from './state.js';
 import { GeoJSON } from 'ol/format';
 import { WebcamWindow } from './webcamWindow.js';

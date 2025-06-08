@@ -2,7 +2,7 @@ import { updateRadarTMSLayer, resetRadarTMSLayer } from './radarTMSLayer';
 import { saveState, getCurrentTime, setCurrentTime, setIsRealTime, getIsRealTime, subscribeToCurrentTime, subscribeToRealTime } from './state';
 import { updateAnimationBranding, updateBrandingOverlay } from './brandingOverlay';
 import strftime from 'strftime';
-import { requireElement, requireButtonElement, requireInputElement } from './domUtils.js';
+import { requireElement, requireButtonElement, requireInputElement } from 'iemjs/domUtils';
 
 let timeInput = null;
 let animationInterval = null;

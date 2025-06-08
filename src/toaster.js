@@ -1,4 +1,4 @@
-import { requireElement } from './domUtils.js';
+import { requireElement } from 'iemjs/domUtils';
 
 /**
  * Show a toaster

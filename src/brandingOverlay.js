@@ -1,7 +1,7 @@
 import { getCurrentTime, getIsRealTime, subscribeToRealTime, subscribeToCurrentTime } from "./state";
 import { rectifyToFiveMinutes } from "./utils";
 import strftime from "strftime";
-import { requireElement } from "./domUtils";
+import { requireElement } from "iemjs/domUtils";
 
 const FMT = '%-I:%M %p';
 
