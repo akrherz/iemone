@@ -11,6 +11,7 @@ import { setupLayerControls } from './layerControls';
 import { initBrandingOverlay } from './brandingOverlay';
 import { setupHelpModal } from './helpModal';
 import { initializeWebcam } from './webcamManager';
+import { requireElement } from 'iemjs/domUtils';
 
 document.addEventListener('DOMContentLoaded', () => {
     // The state manager should already be initialized by this point
@@ -20,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // map will push lat,lon,zoom to state
     const map = initializeMap();
     const radarTMSLayer = createRadarTMSLayer(map);
-    const tableElement = document.getElementById('warnings-table');
+    const tableElement = requireElement('warnings-table');
     const spsLayer = createSPSLayer(map);
     const warningsLayer = createWarningsLayer(map, tableElement);
     initializeWebcam(map);

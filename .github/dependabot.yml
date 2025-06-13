@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "monthly"
     labels:
       - "Bot"
     groups:
@@ -14,3 +14,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      npm:
+        patterns:
+          - '*'
