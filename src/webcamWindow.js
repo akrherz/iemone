@@ -464,7 +464,7 @@ export class WebcamWindow {
     updateTitleWithTimestamp() {
         const titleElement = this.window?.querySelector('.webcam-window-title');
         if (titleElement) {
-            let displayTime;
+            let displayTime = null;
             if (this.options.timestamp) {
                 displayTime = new Date(this.options.timestamp);
             } else {

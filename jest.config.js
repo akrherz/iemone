@@ -1,16 +1,16 @@
 export default {
   testEnvironment: 'jsdom',
   moduleNameMapper: {
-    '\\.(css|less)$': '<rootDir>/test/__mocks__/styleMock.js',
-    '\\.(jpg|jpeg|png|gif|webp|svg)$': '<rootDir>/test/__mocks__/fileMock.js',
-    '^ol/(.*)$': '<rootDir>/test/__mocks__/ol.js',
-    '^ol$': '<rootDir>/test/__mocks__/ol.js',
+    '\\.(css|less)$': '<rootDir>/tests/__mocks__/styleMock.js',
+    '\\.(jpg|jpeg|png|gif|webp|svg)$': '<rootDir>/tests/__mocks__/fileMock.js',
+    '^ol/(.*)$': '<rootDir>/tests/__mocks__/ol.js',
+    '^ol$': '<rootDir>/tests/__mocks__/ol.js',
     '^iemjs/iemdata$': '<rootDir>/node_modules/iemjs/src/iemdata.js',
     '^iemjs/domUtils$': '<rootDir>/node_modules/iemjs/src/domUtils.js'
 
   },
-  setupFilesAfterEnv: ['<rootDir>/test/setupTests.js'],
-  testMatch: ['<rootDir>/test/**/*.test.js'],
+  setupFilesAfterEnv: ['<rootDir>/tests/setupTests.js'],
+  testMatch: ['<rootDir>/tests/**/*.test.js'],
   transform: {
     '^.+\\.js$': ['babel-jest', { rootMode: "upward" }]
   },
@@ -24,7 +24,7 @@ export default {
   coveragePathIgnorePatterns: [
     '/node_modules/',
     '/__mocks__/',
-    '/test/'
+    '/tests/'
   ],
   moduleFileExtensions: ['js', 'mjs']
 };
