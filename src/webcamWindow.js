@@ -1,4 +1,4 @@
-import { getIsRealTime, subscribeToRealTime, getCurrentTime, subscribeToCurrentTime } from './state.js';
+import { getIsRealTime, getCurrentTime } from './state.js';
 import { webcamRegistry } from './webcamRegistry.js';
 import strftime from 'strftime';
 
@@ -21,6 +21,7 @@ export class WebcamWindow {
             views: options.views || null, // Object with view names and URLs
             cid: options.cid || null, // Camera identifier for registry
             timestamp: options.timestamp || null, // Timestamp for the image
+            layer: options.layer || null, // Reference to OpenLayers layer
             ...options
         };
         
@@ -33,6 +34,7 @@ export class WebcamWindow {
         this.window = null;
         this.image = null;
         this.refreshTimer = null;
+        this.layerListener = null;
         this.isVisible = false;
         this.isDragging = false;
         this.isResizing = false;
@@ -44,6 +46,7 @@ export class WebcamWindow {
         this.startX = 0;
         this.startY = 0;
         this.currentView = null; // Track current view for multi-view cameras
+        this.lastKnownImageUrl = null; // Track last known image URL for change detection
         
         // Set initial view for multi-view cameras
         if (this.options.views) {
@@ -54,6 +57,19 @@ export class WebcamWindow {
         this.createWindow();
         this.setupEventListeners();
         this.show();
+        
+        // Initialize lastKnownImageUrl with current src or current view
+        if (this.options.views && this.currentView && this.options.views[this.currentView]) {
+            this.lastKnownImageUrl = this.options.views[this.currentView];
+        } else {
+            this.lastKnownImageUrl = this.options.src;
+        }
+        
+        // Set up layer listener for data updates
+        this.setupLayerListener();
+        
+        // Update initial title with timestamp
+        this.updateTitleWithTimestamp();
         
         // Register with webcam registry if we have a camera ID
         if (this.options.cid) {
@@ -103,9 +119,6 @@ export class WebcamWindow {
             this.window.style.width = `${preferredWindowSize.width}px`;
             this.window.style.height = `${preferredWindowSize.height}px`;
         }
-        
-        // Set initial timestamp on title
-        this.updateTitleWithTimestamp();
     }
 
     setupEventListeners() {
@@ -151,19 +164,6 @@ export class WebcamWindow {
 
         this.image?.addEventListener('load', () => this.handleImageLoad());
         this.image?.addEventListener('error', () => this.handleImageError());
-
-        subscribeToRealTime((isRealtime) => {
-            if (isRealtime) {
-                this.startRefreshTimer();
-            } else {
-                this.stopRefreshTimer();
-            }
-            this.updateTitleWithTimestamp();
-        });
-
-        subscribeToCurrentTime(() => {
-            this.updateTitleWithTimestamp();
-        });
     }
 
     startDrag(e) {
@@ -312,7 +312,7 @@ export class WebcamWindow {
         }, 10);
 
         if (getIsRealTime()) {
-            this.startRefreshTimer();
+            // Layer listener handles updates, no timer needed
         }
     }
 
@@ -321,12 +321,12 @@ export class WebcamWindow {
             this.window.classList.remove('open');
         }
         this.isVisible = false;
-        this.stopRefreshTimer();
+        this.removeLayerListener();
     }
 
     destroy() {
         this.hide();
-        this.stopRefreshTimer();
+        this.removeLayerListener();
         
         // Unregister from webcam registry
         if (this.options.cid) {
@@ -340,6 +340,92 @@ export class WebcamWindow {
                 this.window.parentNode.removeChild(this.window);
             }
         }, 300);
+    }
+
+    setupLayerListener() {
+        if (!this.options.layer || !this.options.cid) {
+            return;
+        }
+
+        const source = this.options.layer.getSource();
+        if (!source) {
+            return;
+        }
+
+        this.layerListener = () => {
+            console.error("WebcamWindow: Layer data updated, handling changes for CID:", this.options.cid);
+            this.handleLayerDataUpdate();
+        };
+
+        source.on('featuresloadend', this.layerListener);
+    }
+
+    removeLayerListener() {
+        if (this.layerListener && this.options.layer) {
+            const source = this.options.layer.getSource();
+            if (source) {
+                source.un('featuresloadend', this.layerListener);
+            }
+            this.layerListener = null;
+        }
+    }
+
+    handleLayerDataUpdate() {
+        if (!this.options.cid || !this.options.layer) {
+            return;
+        }
+
+        const feature = this.findFeatureInLayer();
+        if (!feature) {
+            return;
+        }
+
+        let currentImageUrl = null;
+        
+        if (this.options.views && this.currentView) {
+            const viewUrls = {};
+            for (let i = 1; i <= 9; i++) {
+                const imgurl = feature.get(`imgurl${i}`);
+                if (imgurl) {
+                    viewUrls[`View ${i}`] = imgurl;
+                }
+            }
+            
+            if (viewUrls[this.currentView]) {
+                currentImageUrl = viewUrls[this.currentView];
+            }
+            
+            if (JSON.stringify(viewUrls) !== JSON.stringify(this.options.views)) {
+                this.updateViews(viewUrls);
+            }
+        } else {
+            currentImageUrl = feature.get('imgurl') || feature.get('url');
+        }
+
+        const newTimestamp = feature.get('utc_valid') || feature.get('valid');
+        if (newTimestamp && newTimestamp !== this.options.timestamp) {
+            this.updateTimestamp(newTimestamp);
+        }
+
+        if (currentImageUrl && currentImageUrl !== this.lastKnownImageUrl) {
+            this.lastKnownImageUrl = currentImageUrl;
+            this.options.src = currentImageUrl;
+            this.refresh();
+        }
+    }
+
+    findFeatureInLayer() {
+        if (!this.options.layer || !this.options.cid) {
+            return null;
+        }
+
+        const source = this.options.layer.getSource();
+        if (!source) {
+            return null;
+        }
+
+        const features = source.getFeatures();
+        return features.find(feature => feature.get('cid') === this.options.cid) || null;
     }
 
     refresh() {
@@ -357,7 +443,6 @@ export class WebcamWindow {
             this.errorIndicator.style.display = 'none';
         }
         
-        // Use current view URL for RWIS cameras, fallback to original src
         let currentSrc = this.options.src;
         if (this.options.views && this.currentView && this.options.views[this.currentView]) {
             currentSrc = this.options.views[this.currentView];
@@ -370,25 +455,6 @@ export class WebcamWindow {
         }
     }
 
-    startRefreshTimer() {
-        this.stopRefreshTimer();
-        
-        if (this.options.refreshInterval > 0) {
-            this.refreshTimer = setInterval(() => {
-                if (this.isVisible && !document.hidden) {
-                    this.refresh();
-                }
-            }, this.options.refreshInterval);
-        }
-    }
-
-    stopRefreshTimer() {
-        if (this.refreshTimer) {
-            clearInterval(this.refreshTimer);
-            this.refreshTimer = null;
-        }
-    }
-
     updateTitle(title) {
         this.baseTitle = title;
         this.options.title = title;
@@ -398,8 +464,13 @@ export class WebcamWindow {
     updateTitleWithTimestamp() {
         const titleElement = this.window?.querySelector('.webcam-window-title');
         if (titleElement) {
-            const currentTime = new Date(this.options.timestamp || getCurrentTime());
-            const timestamp = strftime('@%-I:%M %p', currentTime);
+            let displayTime = null;
+            if (this.options.timestamp) {
+                displayTime = new Date(this.options.timestamp);
+            } else {
+                displayTime = new Date(getCurrentTime());
+            }
+            const timestamp = strftime('@%-I:%M %p', displayTime);
             const fullTitle = `${this.baseTitle} ${timestamp}`;
             titleElement.textContent = fullTitle;
         }

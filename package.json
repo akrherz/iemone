@@ -19,6 +19,7 @@
     "babel-jest": "^29.7.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "iemjs": "^0.0.7",
     "vite": "^6.3.5"
   },
   "dependencies": {
@@ -26,7 +27,7 @@
     "eslint-js": "github:eslint/js",
     "globals": "^16.2.0",
     "iemjs": "^0.0.7",
-    "ol": "latest",
+    "ol": "^10.6.0",
     "strftime": "^0.10.3"
   }
 }

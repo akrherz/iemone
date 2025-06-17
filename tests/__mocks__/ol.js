@@ -10,6 +10,14 @@ export const source = {
 export const format = {
   GeoJSON: jest.fn()
 };
+export const style = {
+  Style: jest.fn(),
+  Icon: jest.fn()
+};
+
+// Export Style and Icon directly as well since they're imported as named exports
+export const Style = jest.fn();
+export const Icon = jest.fn();
 
 export default {
   Map,
@@ -17,5 +25,8 @@ export default {
   Overlay,
   layer,
   source,
-  format
+  format,
+  style,
+  Style,
+  Icon
 };
