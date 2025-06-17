@@ -94,42 +94,41 @@ export function refreshJSON() {
         return;
     }
     
-    let url = "https://mesonet.agron.iastate.edu/geojson/webcam.geojson?network=TV";
     const realtimeMode = getState(StateKeys.IS_REALTIME);
     const currentTime = getState(StateKeys.CURRENT_TIME);
+    
+    // Update webcam layer
+    let url = "https://mesonet.agron.iastate.edu/geojson/webcam.geojson?network=TV";
     if (!realtimeMode) {
-        // Append the current timestamp to the URI
         url += `&valid=${currentTime.toISOString()}`;
     }
-    let newsource = new VectorSource({
-        url,
-        format: new GeoJSON()
-    });
-    webcamGeoJsonLayer.setSource(newsource);
+    const webcamSource = webcamGeoJsonLayer.getSource();
+    if (webcamSource) {
+        webcamSource.setUrl(url);
+        webcamSource.refresh();
+    }
 
-    // Dashcam
+    // Update dashcam layer
     url = "https://mesonet.agron.iastate.edu/api/1/idot_dashcam.geojson";
     if (!realtimeMode) {
-        // Append the current timestamp to the URI
         url += `?valid=${currentTime.toISOString()}`;
     }
-    newsource = new VectorSource({
-        url,
-        format: new GeoJSON()
-    });
-    idotdashcamGeoJsonLayer.setSource(newsource);
+    const dashcamSource = idotdashcamGeoJsonLayer.getSource();
+    if (dashcamSource) {
+        dashcamSource.setUrl(url);
+        dashcamSource.refresh();
+    }
 
-    // RWIS
+    // Update RWIS layer
     url = "https://mesonet.agron.iastate.edu/api/1/idot_rwiscam.geojson";
     if (!realtimeMode) {
-        // Append the current timestamp to the URI
         url += `?valid=${currentTime.toISOString()}`;
     }
-    newsource = new VectorSource({
-        url,
-        format: new GeoJSON()
-    });
-    idotRWISLayer.setSource(newsource);
+    const rwisSource = idotRWISLayer.getSource();
+    if (rwisSource) {
+        rwisSource.setUrl(url);
+        rwisSource.refresh();
+    }
 }
 
 export function getWebcamLayers() {
@@ -236,6 +235,15 @@ export function initializeWebcam(map) {
         if (feature.get("cid") === undefined){
             return;
         }
+        
+        // Find which layer this feature belongs to
+        let sourceLayer = null;
+        [webcamGeoJsonLayer, idotdashcamGeoJsonLayer, idotRWISLayer].forEach(layer => {
+            if (layer && layer.getSource().getFeatures().includes(feature)) {
+                sourceLayer = layer;
+            }
+        });
+        
         // Remove styling
         if (currentCameraFeature) {
             currentCameraFeature.setStyle(feature.getStyle());
@@ -264,6 +272,7 @@ export function initializeWebcam(map) {
             title: feature.get('name') || feature.get('cid') || 'Camera View',
             description: `Camera ID: ${feature.get('cid')}`, 
             timestamp: feature.get('utc_valid') || feature.get('valid'),
+            layer: sourceLayer,
         };
         
         // Add view support for RWIS cameras
@@ -278,6 +287,4 @@ export function initializeWebcam(map) {
         new WebcamWindow(windowOptions);
     });
     refreshJSON();
-
-
 };
