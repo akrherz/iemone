@@ -26,7 +26,7 @@
     "eslint-js": "github:eslint/js",
     "globals": "^16.2.0",
     "iemjs": "^0.0.7",
-    "ol": "latest",
+    "ol": "^10.6.0",
     "strftime": "^0.10.3"
   }
 }
