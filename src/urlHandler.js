@@ -1,5 +1,5 @@
 // Handles things with the URL
-import { getState, getCurrentTime, setCurrentTime, subscribeToState, setState, StateKeys } from './state';
+import { getState, getCurrentTime, setCurrentTime, subscribeToState, setState, StateKeys, setLayerVisibility } from './state';
 import { formatTimestampToUTC } from './utils';
 
 function getQueryParams() {
@@ -37,6 +37,15 @@ export function initializeURLHandler() {
         setState(StateKeys.ZOOM, parseFloat(params.zoom));
     }
 
+    // Handle layer visibility from URL (overrides localStorage)
+    const layerParams = ['radar', 'warnings', 'sps', 'webcam', 'dashcam', 'rwis'];
+    layerParams.forEach(layer => {
+        if (params[layer] !== undefined) {
+            const visible = params[layer] === '1' || params[layer] === 'true';
+            setLayerVisibility(layer, visible);
+        }
+    });
+
     // Subscribe to state changes
     subscribeToState(StateKeys.CURRENT_TIME, (currentTime) => {
         const isRealtime = getState(StateKeys.IS_REALTIME);
@@ -69,5 +78,27 @@ export function initializeURLHandler() {
         if (zoom !== null) {
             updateQueryParams('zoom', zoom);
         }
+    });
+
+    // Subscribe to layer visibility changes
+    subscribeToState(StateKeys.LAYER_VISIBILITY, (layerVisibility) => {
+        layerParams.forEach(layer => {
+            const isVisible = layerVisibility[layer];
+            if (isVisible === undefined) {
+                return;
+            }
+            
+            // Only add to URL if different from default
+            const defaultVisibility = {
+                radar: true, warnings: true, sps: true,
+                webcam: true, dashcam: false, rwis: false
+            };
+            
+            if (isVisible !== defaultVisibility[layer]) {
+                updateQueryParams(layer, isVisible ? '1' : '0');
+            } else {
+                updateQueryParams(layer, null);
+            }
+        });
     });
 }

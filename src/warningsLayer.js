@@ -12,8 +12,10 @@ import {
     saveState,
     getActivePhenomena,
     toggleActivePhenomenon,
+    getLayerVisibility,
+    setLayerVisibility,
 } from './state';
-import { requireElement } from 'iemjs/domUtils';
+import { requireInputElement } from 'iemjs/domUtils';
 
 let warningsLayer = null;
 const colorLookup = {
@@ -206,11 +208,17 @@ export function createWarningsLayer(map, tableElement) {
         }
     });
 
-    const warningsLayerToggle = requireElement('toggle-warnings-layer');
+    const warningsLayerToggle = requireInputElement('toggle-warnings-layer');
+    
+    // Initialize from unified state (URL → localStorage → HTML default)
+    warningsLayerToggle.checked = getLayerVisibility('warnings');
+    warningsLayer.setVisible(warningsLayerToggle.checked);
+    
     warningsLayerToggle.addEventListener('change', (event) => {
         const target = event.target;
         if (target instanceof HTMLInputElement) {
             warningsLayer.setVisible(target.checked);
+            setLayerVisibility('warnings', target.checked);
         }
         saveState();
     });

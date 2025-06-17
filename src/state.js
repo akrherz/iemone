@@ -5,7 +5,8 @@ export const StateKeys = {
     LAT: 'lat',
     LON: 'lon',
     ZOOM: 'zoom',
-    ACTIVE_PHENOMENA: 'activePhenomena'
+    ACTIVE_PHENOMENA: 'activePhenomena',
+    LAYER_VISIBILITY: 'layerVisibility'
 };
 
 // Add initial active phenomena set
@@ -14,6 +15,16 @@ const defaultActivePhenomena = new Set([
     "DS.W", "SQ.W", "EW.W", "FL.Y", "FA.Y", "DS.Y"
 ]);
 
+// Default layer visibility state
+const defaultLayerVisibility = {
+    radar: true,
+    warnings: true,
+    sps: true,
+    webcam: true,
+    dashcam: false,
+    rwis: false
+};
+
 const sstate = loadState();
 const state = {
     [StateKeys.CURRENT_TIME]: sstate?.currentTime ? new Date(sstate.currentTime) : new Date(),
@@ -21,7 +32,8 @@ const state = {
     [StateKeys.LAT]: sstate?.latitude ?? 39.8283,
     [StateKeys.LON]: sstate?.longitude ?? -98.5795,
     [StateKeys.ZOOM]: sstate?.zoom ?? 4.0,
-    [StateKeys.ACTIVE_PHENOMENA]: sstate?.activePhenomena ?? new Set(defaultActivePhenomena)
+    [StateKeys.ACTIVE_PHENOMENA]: sstate?.activePhenomena ?? new Set(defaultActivePhenomena),
+    [StateKeys.LAYER_VISIBILITY]: sstate?.layerVisibility ?? { ...defaultLayerVisibility }
 };
 const subscribers = {};
 
@@ -140,18 +152,36 @@ export function toggleActivePhenomenon(key) {
     return phenomena.has(key);
 }
 
+// Layer visibility helper functions
+export function getLayerVisibility(layerName) {
+    const visibility = state[StateKeys.LAYER_VISIBILITY];
+    return visibility[layerName] ?? defaultLayerVisibility[layerName] ?? false;
+}
+
+export function setLayerVisibility(layerName, visible) {
+    const visibility = { ...state[StateKeys.LAYER_VISIBILITY] };
+    visibility[layerName] = visible;
+    setState(StateKeys.LAYER_VISIBILITY, visibility);
+}
+
+export function getAllLayerVisibility() {
+    return state[StateKeys.LAYER_VISIBILITY];
+}
+
 // Update saveState function
 export function saveState() {
     const currentTime = getState(StateKeys.CURRENT_TIME);
     const activePhenomena = Array.from(getActivePhenomena());
     const isRealtime = getState(StateKeys.IS_REALTIME);
+    const layerVisibility = getState(StateKeys.LAYER_VISIBILITY);
     const localstate = {
         activePhenomena,
         latitude: getState(StateKeys.LAT),
         longitude: getState(StateKeys.LON),
         zoom: getState(StateKeys.ZOOM),
         isRealtime,
-        currentTime: (currentTime && !isRealtime) ? currentTime.toISOString() : null
+        currentTime: (currentTime && !isRealtime) ? currentTime.toISOString() : null,
+        layerVisibility
     };
     localStorage.setItem(STATE_KEY, JSON.stringify(localstate));
 }
@@ -166,6 +196,13 @@ export function loadState() {
                 lstate.activePhenomena = new Set(lstate.activePhenomena);
             } else {
                 lstate.activePhenomena = new Set(defaultActivePhenomena);
+            }
+
+            // Ensure layer visibility has proper defaults
+            if (lstate?.layerVisibility && typeof lstate.layerVisibility === 'object') {
+                lstate.layerVisibility = { ...defaultLayerVisibility, ...lstate.layerVisibility };
+            } else {
+                lstate.layerVisibility = { ...defaultLayerVisibility };
             }
 
             // Convert ISO string back to Date if it exists

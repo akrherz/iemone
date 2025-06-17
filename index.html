@@ -132,13 +132,13 @@
         </div>
         <div class="layer-section">
             <label class="layer-toggle">
-                <input type="checkbox" id="toggle-dashcam-layer" checked>
+                <input type="checkbox" id="toggle-dashcam-layer">
                 <span>Iowa DOT Truck Dashcams (2014-)</span>
             </label>
         </div>
         <div class="layer-section">
             <label class="layer-toggle">
-                <input type="checkbox" id="toggle-rwis-layer" checked>
+                <input type="checkbox" id="toggle-rwis-layer">
                 <span>Iowa DOT RWIS Webcams (2010-)</span>
             </label>
         </div>
@@ -180,9 +180,25 @@
 
         <h3>Recent Changes</h3>
         <ul>
+            <li><strong>17 June 2025</strong>: Added webcam imagery collected
+            by the IEM.</li>
             <li><strong>19 May 2025</strong>: Added this help page.</li>
         </ul>
 
+        <h3>URL Parameters</h3>
+        <p>These are the URL parameters that can be used to deep link into
+            application.</p>
+        <ul>
+            <li><strong>zoom=</strong>: Map zoom level.</li>
+            <li><strong>lat=</strong>: Map center north latitude.</li>
+            <li><strong>lon=</strong>: Map center east longitude.</li>
+            <li><strong>rwis=1_or_0</strong>: Show or hide the Iowa DOT RWIS webcams.</li>
+            <li><strong>dashcam=1_or_0</strong>: Show or hide the Iowa DOT dashcams.</li>
+            <li><strong>webcam=1_or_0</strong>: Show or hide the TV webcams.</li>
+            <li><strong>warnings=1_or_0</strong>: Show or hide the weather warnings.</li>
+            <li><strong>radar=1_or_0</strong>: Show or hide the radar imagery.</li>
+            <li><strong>sps=1_or_0</strong>: Show or hide the special weather statements.</li>
+        </ul>
         <h3>Features</h3>
         <ul>
             <li><strong>Mode Selection:</strong> Choose between Real-time and Archive modes</li>
