@@ -2,8 +2,7 @@ import { getIsRealTime, getCurrentTime } from './state.js';
 import { webcamRegistry } from './webcamRegistry.js';
 import strftime from 'strftime';
 
-// Track window count for positioning offsets
-let windowCount = 0;
+// Track z-index for stacking windows
 let topZIndex = 2100;
 
 // Store preferred window dimensions  
@@ -28,8 +27,8 @@ export class WebcamWindow {
         // Store base title for timestamp display
         this.baseTitle = this.options.title;
         
-        // Assign unique ID and increment count
-        this.windowId = ++windowCount;
+        // Assign unique ID for this window instance
+        this.windowId = Date.now() + Math.random();
         
         this.window = null;
         this.image = null;
@@ -102,10 +101,10 @@ export class WebcamWindow {
             <div class="webcam-resize-handle webcam-resize-e" title="Resize"></div>
         `;
 
-        // Apply offset positioning for multiple windows
-        const offset = (this.windowId - 1) * 30;
-        this.window.style.top = `calc(50% + ${offset}px)`;
-        this.window.style.left = `calc(50% + ${offset}px)`;
+        // Center window in viewport
+        this.window.style.top = '50%';
+        this.window.style.left = '50%';
+        this.window.style.transform = 'translate(-50%, -50%)';
         this.window.style.zIndex = (++topZIndex).toString();
 
         document.body.appendChild(this.window);
