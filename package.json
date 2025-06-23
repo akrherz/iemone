@@ -16,9 +16,9 @@
     "@babel/preset-env": "^7.27.2",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
-    "babel-jest": "^30.0.0",
-    "jest": "^30.0.0",
-    "jest-environment-jsdom": "^30.0.0",
+    "babel-jest": "^30.0.2",
+    "jest": "^30.0.2",
+    "jest-environment-jsdom": "^30.0.2",
     "iemjs": "^0.0.7",
     "vite": "^6.3.5"
   },
@@ -27,7 +27,7 @@
     "eslint-js": "github:eslint/js",
     "globals": "^16.2.0",
     "iemjs": "^0.0.7",
-    "ol": "^10.6.0",
+    "ol": "^10.6.1",
     "strftime": "^0.10.3"
   }
 }
