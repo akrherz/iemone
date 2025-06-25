@@ -57,19 +57,25 @@ export function createWarningPopup(feature, popupElement) {
     const issueLocal = formatTimestamp(issueUTC);
     const expireLocal = formatTimestamp(expireUTC);
 
-    popupElement.innerHTML = `
-        <strong>WFO:</strong> ${feature.get('wfo')}<br>
-        <strong>Event:</strong> ${feature.get('ps')} ${feature.get(
+    const popupContent = `
+        <div style="position: relative;">
+            <button onclick="this.parentElement.parentElement.style.display='none'" style="position: absolute; top: -5px; right: -5px; background: #ff0000; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 12px;">×</button>
+            <strong>WFO:</strong> ${feature.get('wfo')}<br>
+            <strong>Event:</strong> ${feature.get('ps')} ${feature.get(
         'eventid'
     )}<br>
-        <strong>Issue:</strong> ${issueLocal} (${issueUTC
+            <strong>Issue:</strong> ${issueLocal} (${issueUTC
         .toISOString()
         .slice(11, 16)} UTC)<br>
-        <strong>Expires:</strong> ${expireLocal} (${expireUTC
+            <strong>Expires:</strong> ${expireLocal} (${expireUTC
         .toISOString()
         .slice(11, 16)} UTC)<br>
-        <a href="${feature.get('href')}" target="_new">VTEC App Link</a>
+            <a href="${feature.get('href')}" target="_new">VTEC App Link</a>
+        </div>
     `;
+    
+    popupElement.innerHTML = popupContent;
+    
     return true;
 }
 
@@ -113,15 +119,16 @@ export function createWarningsLayer(map, tableElement) {
     map.addLayer(warningsLayer);
 
     const popupElement = document.createElement('div');
-    popupElement.id = 'popup';
+    popupElement.id = 'warnings-popup';
     popupElement.style.position = 'absolute';
     popupElement.style.background = 'white';
     popupElement.style.border = '1px solid black';
     popupElement.style.padding = '10px';
     popupElement.style.display = 'none';
-    popupElement.style.zIndex = '1000';
+    popupElement.style.zIndex = '1001';
     popupElement.style.width = '300px';
     popupElement.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+    popupElement.style.borderRadius = '4px';
     document.body.appendChild(popupElement);
 
     const popupOverlay = new Overlay({
@@ -133,15 +140,20 @@ export function createWarningsLayer(map, tableElement) {
 
     map.on('singleclick', (event) => {
         const features = map.getFeaturesAtPixel(event.pixel);
+        let warningFeature = null;
+        
         if (features && features.length > 0) {
-            const feature = features[0];
-            const phenomena = feature.get('phenomena');
-            if (phenomena) {
-                // Only handle warning features
-                if (createWarningPopup(feature, popupElement)) {
-                    popupElement.style.display = 'block';
-                    popupOverlay.setPosition(event.coordinate);
-                }
+            warningFeature = features.find(feature => {
+                const phenomena = feature.get('phenomena');
+                const significance = feature.get('significance');
+                return phenomena && significance;
+            });
+        }
+        
+        if (warningFeature) {
+            if (createWarningPopup(warningFeature, popupElement)) {
+                popupElement.style.display = 'block';
+                popupOverlay.setPosition(event.coordinate);
             }
         } else {
             popupElement.style.display = 'none';

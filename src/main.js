@@ -14,11 +14,14 @@ import { initializeWebcam } from './webcamManager';
 import { requireElement } from 'iemjs/domUtils';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // The state manager should already be initialized by this point
-    // So now we can inspect the URL to see what it says
     initializeURLHandler();
 
-    // map will push lat,lon,zoom to state
+    // Create shared popup element for layers that need it
+    const sharedPopup = document.createElement('div');
+    sharedPopup.id = 'popup';
+    sharedPopup.style.display = 'none';
+    document.body.appendChild(sharedPopup);
+
     const map = initializeMap();
     const radarTMSLayer = createRadarTMSLayer(map);
     const tableElement = requireElement('warnings-table');
