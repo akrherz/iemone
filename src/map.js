@@ -1,5 +1,5 @@
 import Map from 'ol/Map';
-import { OSM } from 'ol/source';
+import { XYZ } from 'ol/source';
 import View from 'ol/View';
 import { toLonLat, fromLonLat } from 'ol/proj';
 import Tile from 'ol/layer/Tile';
@@ -19,13 +19,34 @@ export function initializeMap() {
         minZoom: 2
     });
 
+    const baseLayer = new Tile({
+        source: new XYZ({
+            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+            attributions: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        })
+    });
+
+    const referenceLayer = new Tile({
+        source: new XYZ({
+            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+            attributions: 'Tiles © Esri'
+        }),
+        opacity: 0.8,
+        zIndex: 1000
+    });
+
+    const transportationLayer = new Tile({
+        source: new XYZ({
+            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',
+            attributions: 'Tiles © Esri'
+        }),
+        opacity: 0.7,
+        zIndex: 1001
+    });
+
     const map = new Map({
         target: 'map',
-        layers: [
-            new Tile({
-                source: new OSM()
-            })
-        ],
+        layers: [baseLayer, referenceLayer, transportationLayer],
         view
     });
 
