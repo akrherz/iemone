@@ -6,7 +6,8 @@ export const StateKeys = {
     LON: 'lon',
     ZOOM: 'zoom',
     ACTIVE_PHENOMENA: 'activePhenomena',
-    LAYER_VISIBILITY: 'layerVisibility'
+    LAYER_VISIBILITY: 'layerVisibility',
+    BASE_LAYER: 'baseLayer'
 };
 
 // Add initial active phenomena set
@@ -33,7 +34,8 @@ const state = {
     [StateKeys.LON]: sstate?.longitude ?? -98.5795,
     [StateKeys.ZOOM]: sstate?.zoom ?? 4.0,
     [StateKeys.ACTIVE_PHENOMENA]: sstate?.activePhenomena ?? new Set(defaultActivePhenomena),
-    [StateKeys.LAYER_VISIBILITY]: sstate?.layerVisibility ?? { ...defaultLayerVisibility }
+    [StateKeys.LAYER_VISIBILITY]: sstate?.layerVisibility ?? { ...defaultLayerVisibility },
+    [StateKeys.BASE_LAYER]: sstate?.baseLayer ?? 'esri-hybrid'
 };
 const subscribers = {};
 
@@ -174,6 +176,7 @@ export function saveState() {
     const activePhenomena = Array.from(getActivePhenomena());
     const isRealtime = getState(StateKeys.IS_REALTIME);
     const layerVisibility = getState(StateKeys.LAYER_VISIBILITY);
+    const baseLayer = getState(StateKeys.BASE_LAYER);
     const localstate = {
         activePhenomena,
         latitude: getState(StateKeys.LAT),
@@ -181,7 +184,8 @@ export function saveState() {
         zoom: getState(StateKeys.ZOOM),
         isRealtime,
         currentTime: (currentTime && !isRealtime) ? currentTime.toISOString() : null,
-        layerVisibility
+        layerVisibility,
+        baseLayer
     };
     localStorage.setItem(STATE_KEY, JSON.stringify(localstate));
 }

@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupTimeInputControl();
     setupWarningsTable(tableElement, warningsLayer);
     setupWarningsModal();
-    setupLayerControls(radarTMSLayer, spsLayer);
+    setupLayerControls(map, radarTMSLayer, spsLayer);
     setupHelpModal();
     initBrandingOverlay();
 });
