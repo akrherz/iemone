@@ -54,6 +54,17 @@
     <div class="drawer-content">
         <h3>Map Layers</h3>
         <div class="layer-section">
+            <h4>Base Layer</h4>
+            <select id="base-layer-select" class="base-layer-select">
+                <option value="esri-hybrid">ESRI Satellite + Labels</option>
+                <option value="esri-satellite">ESRI Satellite Only</option>
+                <option value="esri-topo">ESRI Topographic</option>
+                <option value="openstreetmap">OpenStreetMap</option>
+                <option value="cartodb-dark">CartoDB Dark</option>
+                <option value="cartodb-light">CartoDB Light</option>
+            </select>
+        </div>
+        <div class="layer-section">
             <label class="layer-toggle">
                 <input type="checkbox" id="toggle-tms-layer" checked>
                 <span>Radar Layer</span>
@@ -180,6 +191,8 @@
 
         <h3>Recent Changes</h3>
         <ul>
+            <li><strong>26 July 2025</strong>: Added option to select a basemap
+            layer.  This option is peristed to your local storage.</li>
             <li><strong>17 June 2025</strong>: Added webcam imagery collected
             by the IEM.</li>
             <li><strong>19 May 2025</strong>: Added this help page.</li>

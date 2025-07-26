@@ -1,4 +1,4 @@
-import { saveState, getLayerVisibility, setLayerVisibility } from './state';
+import { saveState, getLayerVisibility, setLayerVisibility, getState, setState, StateKeys } from './state';
 import { requireElement, requireInputElement } from 'iemjs/domUtils';
 import { getWebcamLayers } from './webcamManager.js';
 
@@ -6,7 +6,7 @@ function saveLayerState() {
     saveState();
 }
 
-export function setupLayerControls(radarTMSLayer, spsLayer) {
+export function setupLayerControls(map, radarTMSLayer, spsLayer) {
     const layersToggle = requireElement('layers-toggle');
     const layerControl = requireElement('layer-control');
     const closeLayersButton = requireElement('close-layers');
@@ -17,6 +17,22 @@ export function setupLayerControls(radarTMSLayer, spsLayer) {
 
     closeLayersButton.addEventListener('click', () => {
         layerControl.classList.remove('open');
+    });
+
+    // Setup base layer control
+    const baseLayerSelect = requireElement('base-layer-select');
+    
+    // Initialize from state
+    baseLayerSelect.value = getState(StateKeys.BASE_LAYER);
+    
+    baseLayerSelect.addEventListener('change', (event) => {
+        const target = event.target;
+        if (target instanceof HTMLSelectElement && map.baseLayerManager) {
+            const selectedBaseLayer = target.value;
+            map.baseLayerManager.setBaseLayers(map, selectedBaseLayer);
+            setState(StateKeys.BASE_LAYER, selectedBaseLayer);
+            saveState();
+        }
     });
 
     // Setup radar layer control with unified system

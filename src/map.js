@@ -1,13 +1,13 @@
 import Map from 'ol/Map';
-import { XYZ } from 'ol/source';
 import View from 'ol/View';
 import { toLonLat, fromLonLat } from 'ol/proj';
-import Tile from 'ol/layer/Tile';
 import { getState, setState, StateKeys, saveState } from './state';
+import { BaseLayerManager } from './baseLayerManager';
 
 export function initializeMap() {
     const defaultCenter = [getState(StateKeys.LON), getState(StateKeys.LAT)];
     const defaultZoom = getState(StateKeys.ZOOM);
+    const selectedBaseLayer = getState(StateKeys.BASE_LAYER);
 
     const viewCenter = fromLonLat(defaultCenter);
 
@@ -19,34 +19,15 @@ export function initializeMap() {
         minZoom: 2
     });
 
-    const baseLayer = new Tile({
-        source: new XYZ({
-            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-            attributions: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-        })
-    });
-
-    const referenceLayer = new Tile({
-        source: new XYZ({
-            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
-            attributions: 'Tiles © Esri'
-        }),
-        opacity: 0.8,
-        zIndex: 1000
-    });
-
-    const transportationLayer = new Tile({
-        source: new XYZ({
-            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',
-            attributions: 'Tiles © Esri'
-        }),
-        opacity: 0.7,
-        zIndex: 1001
-    });
+    const baseLayerManager = new BaseLayerManager();
+    const baseLayers = baseLayerManager.createBaseLayers(selectedBaseLayer);
+    
+    // Store the current base layers in the manager
+    baseLayerManager.currentBaseLayers = baseLayers;
 
     const map = new Map({
         target: 'map',
-        layers: [baseLayer, referenceLayer, transportationLayer],
+        layers: baseLayers,
         view
     });
 
@@ -63,5 +44,9 @@ export function initializeMap() {
         setState(StateKeys.ZOOM, zoom);
         saveState();
     });
+
+    // Store the base layer manager on the map for later access
+    map.baseLayerManager = baseLayerManager;
+    
     return map;
 }
