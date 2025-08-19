@@ -11,8 +11,12 @@ function handleTimeInputChange(event) {
     if (!timeInput) {
         return;
     }
-    setCurrentTime(new Date(event.target.value));
-    updateRadarTMSLayer(getCurrentTime());
+    const newTime = new Date(event.target.value);
+    if (isNaN(newTime.getTime()) || !event.target.value) {
+        return; // Invalid or incomplete date, ignore
+    }
+    setCurrentTime(newTime);
+    saveState();
 }
 
 function toggleAnimation() {
@@ -69,6 +73,9 @@ function toggleAnimation() {
 export function setupTimeInputControl() {
     timeInput = requireElement('current-time');
     
+    // Set initial time input value from current state
+    updateTimeInput(getCurrentTime());
+    
     subscribeToCurrentTime((currentTime) => {
         updateTimeInput(currentTime);
     });
@@ -78,13 +85,20 @@ export function setupTimeInputControl() {
         // Update the radio buttons
         requireInputElement('realtime-mode').checked = isRealtime;
         requireInputElement('archive-mode').checked = !isRealtime;
-        // Update branding overlay
-        const brandingOverlay = requireElement('branding-overlay');
-        brandingOverlay.textContent = `IEM1: ${isRealtime ? 'Real-time' : 'Archive'}`;
-        brandingOverlay.dataset.mode = isRealtime ? 'realtime' : 'archive';
     });
 
     timeInput.addEventListener('change', handleTimeInputChange);
+    
+    // Prevent the input from being updated while user is typing
+    timeInput.addEventListener('focus', () => {
+        timeInput.dataset.userEditing = 'true';
+    });
+    
+    timeInput.addEventListener('blur', () => {
+        delete timeInput.dataset.userEditing;
+        // Update to current state when user finishes editing
+        updateTimeInput(getCurrentTime());
+    });
 
     const timeStepBackwardButton = requireButtonElement('time-step-backward');
     const timePlayPauseButton = requireButtonElement('time-play-pause');
@@ -121,7 +135,8 @@ export function setupTimeInputControl() {
 }
 
 function updateTimeInput(time) {
-    if (timeInput) {
+    if (timeInput && document.activeElement !== timeInput && !timeInput.dataset.userEditing) {
+        // Only update if user is not currently typing in the input
         timeInput.value = strftime('%Y-%m-%dT%H:%M', time);
     }
 }
@@ -131,7 +146,6 @@ function stepTime(minutes) {
     const newTime = new Date(currentTime);
     newTime.setMinutes(currentTime.getMinutes() + minutes);
     setCurrentTime(newTime);
-    updateRadarTMSLayer(newTime);
     saveState();
 }
 
