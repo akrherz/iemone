@@ -39,7 +39,8 @@
     <!-- Line 2: Time Navigation -->
     <div class="time-navigation">
         <button id="time-step-backward" class="time-nav-button">◀</button>
-        <input type="datetime-local" id="current-time" class="time-input">
+        <input type="datetime-local" id="current-time" class="time-input" 
+               min="1993-01-01T00:00" max="2030-12-31T23:59" step="60">
         <button id="time-step-forward" class="time-nav-button">▶</button>
     </div>
     <!-- Line 3: Animation Control -->
