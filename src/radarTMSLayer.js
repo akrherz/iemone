@@ -15,7 +15,8 @@ function getRadarURL(time) {
     // Always rectify the timestamp for radar requests
     const rectifiedTime = rectifyToFiveMinutes(time);
     const formattedTimestamp = formatTimestampToUTC(rectifiedTime);
-    return `${SERVICE}ridge::USCOMP-N0Q-${formattedTimestamp}/{z}/{x}/{y}.png`;
+    const prod = (rectifiedTime.getFullYear() < 2011) ? 'N0R' : 'N0Q';
+    return `${SERVICE}ridge::USCOMP-${prod}-${formattedTimestamp}/{z}/{x}/{y}.png`;
 }
 
 export function createRadarTMSLayer(map) {
