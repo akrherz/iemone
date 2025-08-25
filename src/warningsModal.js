@@ -28,17 +28,17 @@ export function setupWarningsModal() {
     let offsetX = 0;
     let offsetY = 0;
 
-    warningsModalContent.addEventListener('mousedown', (e) => {
+    warningsModalContent.addEventListener('mousedown', (evt) => {
         isDragging = true;
-        offsetX = e.clientX - warningsModal.offsetLeft;
-        offsetY = e.clientY - warningsModal.offsetTop;
+        offsetX = evt.clientX - warningsModal.offsetLeft;
+        offsetY = evt.clientY - warningsModal.offsetTop;
         warningsModal.style.transition = 'none'; // Disable transition during drag
     });
 
-    document.addEventListener('mousemove', (e) => {
+    document.addEventListener('mousemove', (evt) => {
         if (isDragging) {
-            warningsModal.style.left = `${e.clientX - offsetX}px`;
-            warningsModal.style.top = `${e.clientY - offsetY}px`;
+            warningsModal.style.left = `${evt.clientX - offsetX}px`;
+            warningsModal.style.top = `${evt.clientY - offsetY}px`;
         }
     });
 

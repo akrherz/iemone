@@ -30,17 +30,17 @@ export function setupHelpModal() {
     let offsetX = 0;
     let offsetY = 0;
 
-    helpModalHeader.addEventListener('mousedown', (e) => {
+    helpModalHeader.addEventListener('mousedown', (evt) => {
         isDragging = true;
-        offsetX = e.clientX - helpModal.offsetLeft;
-        offsetY = e.clientY - helpModal.offsetTop;
+        offsetX = evt.clientX - helpModal.offsetLeft;
+        offsetY = evt.clientY - helpModal.offsetTop;
         helpModal.style.transition = 'none'; // Disable transition during drag
     });
 
-    document.addEventListener('mousemove', (e) => {
+    document.addEventListener('mousemove', (evt) => {
         if (isDragging) {
-            helpModal.style.left = `${e.clientX - offsetX}px`;
-            helpModal.style.top = `${e.clientY - offsetY}px`;
+            helpModal.style.left = `${evt.clientX - offsetX}px`;
+            helpModal.style.top = `${evt.clientY - offsetY}px`;
             helpModal.style.transform = 'none'; // Remove centering transform
         }
     });

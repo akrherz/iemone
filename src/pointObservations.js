@@ -111,18 +111,18 @@ export function getLabelAttribute(layer) {
 function createLabeledSVG(text, color) {
     // Use black text for white/light backgrounds, white text for dark backgrounds
     const textColor = color === '#ffffff' ? '#000000' : '#ffffff';
-    const svg = encodeURIComponent(
+    const svgg = encodeURIComponent(
         `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="18"><rect rx="3" ry="3" width="28" height="18" fill="${color}"/><text x="14" y="13" font-size="10" font-family="sans-serif" fill="${textColor}" text-anchor="middle">${text}</text></svg>`
     );
-    return `data:image/svg+xml;utf8,${svg}`;
+    return `data:image/svg+xml;utf8,${svgg}`;
 }
 
 // Helper: create an SVG circle without label
 function createUnlabeledCircle(color) {
-    const svg = encodeURIComponent(
+    const svgg = encodeURIComponent(
         `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"><circle cx="6" cy="6" r="5" fill="${color}" stroke="#ffffff" stroke-width="1"/></svg>`
     );
-    return `data:image/svg+xml;utf8,${svg}`;
+    return `data:image/svg+xml;utf8,${svgg}`;
 }
 
 // Color scale for RWIS temperature in F focused on freezing conditions
@@ -130,23 +130,23 @@ function tmpfColorScale(val) {
     if (val === null || val === undefined || Number.isNaN(val)) {
         return '#999999';
     }
-    const v = Math.round(val);
-    if (v < 30) {
+    const vv = Math.round(val);
+    if (vv < 30) {
         return '#ffffff';  // white
     }
-    if (v < 31) {
+    if (vv < 31) {
         return '#800080';  // purple
     }
-    if (v < 32) {
+    if (vv < 32) {
         return '#dda0dd';  // light purple
     }
-    if (v < 33) {
+    if (vv < 33) {
         return '#ff0000';  // red
     }
-    if (v < 34) {
+    if (vv < 34) {
         return '#ffa500';  // orange
     }
-    if (v < 35) {
+    if (vv < 35) {
         return '#32cd32';  // lime green
     }
     return '#008000';  // green
@@ -236,8 +236,8 @@ export function createRwisLayer(map, options = {}) {
             if (instance) {
                 instance.overlay = overlay;
             }
-        } catch (e) {
-            console.error('Failed to create RWIS overlay:', e);
+        } catch (err) {
+            console.error('Failed to create RWIS overlay:', err);
             overlay = null;
         }
     }
@@ -295,17 +295,17 @@ export function createRwisLayer(map, options = {}) {
                     const timePart = parts[1] || '00:00:00';
                     const [year, month, day] = datePart.split('-');
                     const [hour, minute] = timePart.split(':');
-                    const d = new Date(year, month - 1, day, hour, minute);
-                    localTime = d.toLocaleString();
+                    const dd = new Date(year, month - 1, day, hour, minute);
+                    localTime = dd.toLocaleString();
                 } catch {
                     localTime = props.local_valid;
                 }
             }
             if (props.utc_valid) {
                 try {
-                    const d = new Date(props.utc_valid);
-                    const hours = d.getUTCHours().toString().padStart(2, '0');
-                    const minutes = d.getUTCMinutes().toString().padStart(2, '0');
+                    const dd = new Date(props.utc_valid);
+                    const hours = dd.getUTCHours().toString().padStart(2, '0');
+                    const minutes = dd.getUTCMinutes().toString().padStart(2, '0');
                     utcTime = `(${hours}${minutes} UTC)`;
                 } catch {
                     utcTime = props.utc_valid;

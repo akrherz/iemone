@@ -230,8 +230,8 @@ export function loadState() {
                 lstate.currentTime = new Date();
             }
             return lstate;
-        } catch (e) {
-            console.error('Failed to parse saved state:', e);
+        } catch (err) {
+            console.error('Failed to parse saved state:', err);
             return null;
         }
     }
