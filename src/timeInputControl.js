@@ -112,15 +112,15 @@ export function setupTimeInputControl() {
     realtimeMode.checked = isRealtime;
     archiveMode.checked = !isRealtime;
 
-    realtimeMode.addEventListener('change', (e) => {
-        const target = e.target;
+    realtimeMode.addEventListener('change', (evt) => {
+        const target = evt.target;
         if (target instanceof HTMLInputElement) {
             setIsRealTime(target.checked);
         }
         saveState();
     });
-    archiveMode.addEventListener('change', (e) => {
-        const target = e.target;
+    archiveMode.addEventListener('change', (evt) => {
+        const target = evt.target;
         if (target instanceof HTMLInputElement) {
             setIsRealTime(!target.checked);
         }

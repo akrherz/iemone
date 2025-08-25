@@ -1,12 +1,13 @@
 import { saveState, getLayerVisibility, setLayerVisibility, getState, setState, StateKeys } from './state';
 import { requireElement, requireInputElement } from 'iemjs/domUtils';
 import { getWebcamLayers } from './webcamManager.js';
+import { setLabelAttribute, getLabelAttribute } from './pointObservations.js';
 
 function saveLayerState() {
     saveState();
 }
 
-export function setupLayerControls(map, radarTMSLayer, spsLayer) {
+export function setupLayerControls(map, radarTMSLayer, spsLayer, rwisLayer) {
     const layersToggle = requireElement('layers-toggle');
     const layerControl = requireElement('layer-control');
     const closeLayersButton = requireElement('close-layers');
@@ -116,6 +117,53 @@ export function setupLayerControls(map, radarTMSLayer, spsLayer) {
         });
     }
     
+    if (rwisLayer) {
+        try {
+            const rwisLayerToggle = requireInputElement('toggle-rwisobs-layer');
+                    
+            // Set initial state to match layer
+            rwisLayerToggle.checked = rwisLayer.getVisible();
+            
+            // Handle changes  
+            rwisLayerToggle.addEventListener('change', function() {
+                
+                rwisLayer.setVisible(this.checked);
+                
+                setLayerVisibility('rwisobs', this.checked);
+                saveLayerState();
+            });
+            
+        } catch (error) {
+            console.error('Error setting up RWIS layer control:', error);
+        }
+        
+        // Wire RWIS label attribute select
+        try {
+            const rwisLabelSelect = requireElement('rwis-label-attr');
+            // Initialize from layer-specific default
+            try {
+                if (rwisLabelSelect instanceof HTMLSelectElement) {
+                    rwisLabelSelect.value = getLabelAttribute(rwisLayer);
+                }
+            } catch {
+                // ignore
+            }
+
+            rwisLabelSelect.addEventListener('change', (ev) => {
+                const target = ev.target;
+                if (target instanceof HTMLSelectElement) {
+                    try {
+                        setLabelAttribute(rwisLayer, target.value);
+                    } catch (error) {
+                        console.error('Error calling setLabelAttribute for RWIS:', error);
+                    }
+                }
+            });
+        } catch {
+            // UI not present - ignore
+        }
+    }
+    // Webcam RWIS layer control
     if (webcamLayers.idotRWISLayer) {
         const rwisLayerToggle = requireInputElement('toggle-rwis-layer');
         

@@ -12,6 +12,7 @@ import { initBrandingOverlay } from './brandingOverlay';
 import { setupHelpModal } from './helpModal';
 import { initializeWebcam } from './webcamManager';
 import { requireElement } from 'iemjs/domUtils';
+import { createRwisLayer } from './pointObservations';
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeURLHandler();
@@ -24,6 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const map = initializeMap();
     const radarTMSLayer = createRadarTMSLayer(map);
+    // Create RWIS observations layer (clustered)
+    const rwisLayer = createRwisLayer(map, { defaultUrl: 'https://mesonet.agron.iastate.edu/api/1/rwis.geojson', cluster: true });
     const tableElement = requireElement('warnings-table');
     const spsLayer = createSPSLayer(map);
     const warningsLayer = createWarningsLayer(map, tableElement);
@@ -33,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupTimeInputControl();
     setupWarningsTable(tableElement, warningsLayer);
     setupWarningsModal();
-    setupLayerControls(map, radarTMSLayer, spsLayer);
+    setupLayerControls(map, radarTMSLayer, spsLayer, rwisLayer);
     setupHelpModal();
     initBrandingOverlay();
 });

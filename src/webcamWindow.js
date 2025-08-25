@@ -130,8 +130,8 @@ export class WebcamWindow {
 
         // Add view selector event listener for RWIS cameras
         if (viewSelector) {
-            viewSelector.addEventListener('change', (e) => {
-                const selectedView = /** @type {HTMLSelectElement} */ (e.target).value;
+            viewSelector.addEventListener('change', (evt) => {
+                const selectedView = /** @type {HTMLSelectElement} */ (evt.target).value;
                 this.switchView(selectedView);
             });
         }
@@ -140,19 +140,19 @@ export class WebcamWindow {
         this.boundStopDragAndResize = this.stopDragAndResize.bind(this);
 
         if (window.innerWidth > 768 && header) {
-            header.addEventListener('mousedown', (e) => {
+            header.addEventListener('mousedown', (evt) => {
                 // Only start drag if not clicking on close button or resize handle
-                const target = /** @type {HTMLElement} */ (e.target);
+                const target = /** @type {HTMLElement} */ (evt.target);
                 if (!target?.classList?.contains('webcam-resize-handle') && 
                     !target?.classList?.contains('webcam-modal-close')) {
-                    this.startDrag(e);
+                    this.startDrag(evt);
                 }
             });
         }
 
         if (window.innerWidth > 768 && resizeHandles) {
             resizeHandles.forEach(handle => {
-                handle.addEventListener('mousedown', (e) => this.startResize(e));
+                handle.addEventListener('mousedown', (evt) => this.startResize(evt));
             });
         }
 
@@ -165,12 +165,12 @@ export class WebcamWindow {
         this.image?.addEventListener('error', () => this.handleImageError());
     }
 
-    startDrag(e) {
+    startDrag(evt) {
         this.isDragging = true;
         if (this.window) {
             const rect = this.window.getBoundingClientRect();
-            this.offsetX = e.clientX - rect.left;
-            this.offsetY = e.clientY - rect.top;
+            this.offsetX = evt.clientX - rect.left;
+            this.offsetY = evt.clientY - rect.top;
             this.window.style.transition = 'none';
         }
         
@@ -179,20 +179,20 @@ export class WebcamWindow {
         document.addEventListener('mouseup', this.boundStopDragAndResize);
     }
 
-    startResize(e) {
-        e.stopPropagation();
-        e.preventDefault();
+    startResize(evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
         this.isResizing = true;
         
         if (this.window) {
             const rect = this.window.getBoundingClientRect();
-            this.startX = e.clientX;
-            this.startY = e.clientY;
+            this.startX = evt.clientX;
+            this.startY = evt.clientY;
             this.startWidth = rect.width;
             this.startHeight = rect.height;
             
             // Determine resize direction from class name
-            const classList = e.target.classList;
+            const classList = evt.target.classList;
             if (classList.contains('webcam-resize-se')) {
                 this.resizeDirection = 'se';
             } else if (classList.contains('webcam-resize-s')) {
@@ -209,17 +209,17 @@ export class WebcamWindow {
         document.addEventListener('mouseup', this.boundStopDragAndResize);
     }
 
-    handleDragAndResize(e) {
+    handleDragAndResize(evt) {
         if (this.isDragging && this.window) {
-            this.window.style.left = `${e.clientX - this.offsetX}px`;
-            this.window.style.top = `${e.clientY - this.offsetY}px`;
+            this.window.style.left = `${evt.clientX - this.offsetX}px`;
+            this.window.style.top = `${evt.clientY - this.offsetY}px`;
             this.window.style.transform = 'none';
         }
         
         if (this.isResizing && this.window) {
-            const deltaX = e.clientX - this.startX;
-            const deltaY = e.clientY - this.startY;
-            
+            const deltaX = evt.clientX - this.startX;
+            const deltaY = evt.clientY - this.startY;
+
             let newWidth = this.startWidth;
             let newHeight = this.startHeight;
             

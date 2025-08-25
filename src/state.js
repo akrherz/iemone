@@ -21,6 +21,7 @@ const defaultLayerVisibility = {
     radar: true,
     warnings: true,
     sps: true,
+    pointobs: true,
     webcam: true,
     dashcam: false,
     rwis: false
@@ -229,8 +230,8 @@ export function loadState() {
                 lstate.currentTime = new Date();
             }
             return lstate;
-        } catch (e) {
-            console.error('Failed to parse saved state:', e);
+        } catch (err) {
+            console.error('Failed to parse saved state:', err);
             return null;
         }
     }

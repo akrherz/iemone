@@ -798,6 +798,37 @@ html, body {
 /* Ensure proper stacking context */
 #branding-overlay { z-index: 1000; }
 #layer-control { z-index: 1004; }
+
+/* Popup overlay for point observations */
+#popup {
+    position: absolute;
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    white-space: nowrap;
+    z-index: 2005; /* Above controls but below large modals */
+    pointer-events: auto;
+}
+
+.popup-content h4 {
+    margin: 0 0 6px 0;
+    font-size: 14px;
+}
+.popup-content table {
+    border-collapse: collapse;
+}
+.popup-content th {
+    text-align: left;
+    padding-right: 8px;
+    font-weight: 600;
+}
+.popup-content td {
+    padding: 0 4px;
+}
 #warnings-modal { z-index: 2000; }
 #time-control { z-index: 1002; }
 .control-toggle-group { z-index: 1003; }

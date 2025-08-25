@@ -38,7 +38,7 @@ export function initializeURLHandler() {
     }
 
     // Handle layer visibility from URL (overrides localStorage)
-    const layerParams = ['radar', 'warnings', 'sps', 'webcam', 'dashcam', 'rwis'];
+    const layerParams = ['radar', 'warnings', 'sps', 'webcam', 'dashcam', 'rwis', 'rwisobs'];
     layerParams.forEach(layer => {
         if (params[layer] !== undefined) {
             const visible = params[layer] === '1' || params[layer] === 'true';
@@ -91,7 +91,7 @@ export function initializeURLHandler() {
             // Only add to URL if different from default
             const defaultVisibility = {
                 radar: true, warnings: true, sps: true,
-                webcam: true, dashcam: false, rwis: false
+                webcam: true, dashcam: false, rwis: false, rwisobs: false
             };
             
             if (isVisible !== defaultVisibility[layer]) {
