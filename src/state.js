@@ -21,6 +21,7 @@ const defaultLayerVisibility = {
     radar: true,
     warnings: true,
     sps: true,
+    pointobs: true,
     webcam: true,
     dashcam: false,
     rwis: false
