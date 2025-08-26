@@ -7,6 +7,7 @@ export const StateKeys = {
     ZOOM: 'zoom',
     ACTIVE_PHENOMENA: 'activePhenomena',
     LAYER_VISIBILITY: 'layerVisibility',
+    RWIS_LABEL: 'rwisobsLabel',
     BASE_LAYER: 'baseLayer'
 };
 
@@ -36,7 +37,8 @@ const state = {
     [StateKeys.ZOOM]: sstate?.zoom ?? 4.0,
     [StateKeys.ACTIVE_PHENOMENA]: sstate?.activePhenomena ?? new Set(defaultActivePhenomena),
     [StateKeys.LAYER_VISIBILITY]: sstate?.layerVisibility ?? { ...defaultLayerVisibility },
-    [StateKeys.BASE_LAYER]: sstate?.baseLayer ?? 'esri-hybrid'
+    [StateKeys.BASE_LAYER]: sstate?.baseLayer ?? 'esri-hybrid',
+    [StateKeys.RWIS_LABEL]: sstate?.rwisobsLabel ?? 'tfs0'
 };
 const subscribers = {};
 
@@ -186,7 +188,8 @@ export function saveState() {
         isRealtime,
         currentTime: (currentTime && !isRealtime) ? currentTime.toISOString() : null,
         layerVisibility,
-        baseLayer
+    baseLayer,
+    rwisobsLabel: getState(StateKeys.RWIS_LABEL)
     };
     localStorage.setItem(STATE_KEY, JSON.stringify(localstate));
 }
@@ -224,6 +227,9 @@ export function loadState() {
 
             // Ensure isRealtime has a boolean value
             lstate.isRealtime = lstate.isRealtime ?? true;
+
+            // Ensure rwis label exists
+            lstate.rwisobsLabel = lstate.rwisobsLabel ?? 'tfs0';
 
             // If isRealtime, then set the currentTime to now
             if (lstate.isRealtime) {

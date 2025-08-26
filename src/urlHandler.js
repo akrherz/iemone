@@ -46,6 +46,13 @@ export function initializeURLHandler() {
         }
     });
 
+    // Handle RWIS label attribute from URL
+    if (params.rwisobs_label) {
+        setState(StateKeys.RWIS_LABEL, params.rwisobs_label);
+    }
+
+    // (Initial localStorage merge is handled in a dedicated bootstrap step.)
+
     // Subscribe to state changes
     subscribeToState(StateKeys.CURRENT_TIME, (currentTime) => {
         const isRealtime = getState(StateKeys.IS_REALTIME);
@@ -77,6 +84,15 @@ export function initializeURLHandler() {
     subscribeToState(StateKeys.ZOOM, (zoom) => {
         if (zoom !== null) {
             updateQueryParams('zoom', zoom);
+        }
+    });
+
+    // Persist RWIS label in URL
+    subscribeToState(StateKeys.RWIS_LABEL, (label) => {
+        if (label) {
+            updateQueryParams('rwisobs_label', label);
+        } else {
+            updateQueryParams('rwisobs_label', null);
         }
     });
 

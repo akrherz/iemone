@@ -3,9 +3,9 @@ import { Vector as VectorSource } from 'ol/source';
 import { Style, Icon } from 'ol/style';
 import { GeoJSON } from 'ol/format';
 import Overlay from 'ol/Overlay';
-import { getLayerVisibility, subscribeToCurrentTime, getIsRealTime, getCurrentTime } from './state.js';
+import { getLayerVisibility, subscribeToCurrentTime, getIsRealTime, getCurrentTime, subscribeToRealTime, setState, getState, StateKeys } from './state.js';
 
-const labelAttributeDefault = 'tmpf';
+const labelAttributeDefault = 'tfs0';
 const layerInstances = new WeakMap();
 
 // Use a small inline SVG icon so the style works in tests (Icon is mocked) and
@@ -84,8 +84,14 @@ export function setLabelAttribute(layer, attr) {
     if (!instance) {
         return;
     }
-        
     instance.labelAttribute = attr;
+    // Persist the selected label to global state so it can be saved to URL/localStorage
+    try {
+        setState(StateKeys.RWIS_LABEL, attr);
+    } catch (err) {
+        // ignore in environments without state
+        console.debug && console.debug('setLabelAttribute state set failed', err);
+    }
     
     
     // Force a style refresh if the layer exists
@@ -101,10 +107,15 @@ export function setLabelAttribute(layer, attr) {
 
 export function getLabelAttribute(layer) {
     if (!layer) {
-        return labelAttributeDefault;
+        // If no layer provided, fall back to persisted state or default
+        return getState(StateKeys.RWIS_LABEL) || labelAttributeDefault;
     }
     const instance = layerInstances.get(layer);
-    return instance ? instance.labelAttribute : labelAttributeDefault;
+    if (instance && instance.labelAttribute) {
+        return instance.labelAttribute;
+    }
+    // Fallback to persisted state
+    return getState(StateKeys.RWIS_LABEL) || labelAttributeDefault;
 }
 
 // Helper: create an SVG icon with a numeric label and color
@@ -360,33 +371,34 @@ export function createRwisLayer(map, options = {}) {
         });
     }
 
-    // Auto-refresh behavior: subscribe to current time changes
-    try {
+    const doRealtimeRefresh = (isRT) => {
+        if (isRT) {
+            refreshPointObservations(layer, defaultUrl);
+        }
+    };
+    const doRefreshIfNeeded = (dtime) => {
+        const current = dtime || getCurrentTime();
+        const isRt = getIsRealTime();
         
-        const doRefreshIfNeeded = (dtime) => {
-            const current = dtime || getCurrentTime();
-            const isRt = getIsRealTime();
-            
-            if (isRt) {
-                // Realtime mode: only refresh every 5 minutes
-                const minute = current.getUTCMinutes();
-                if (minute % 5 === 0) {
-                    refreshPointObservations(layer, defaultUrl);
-                }
-            } else {
-                // Archive mode: always refresh with valid=ISO parameter
-                const iso = current.toISOString();
-                refreshPointObservations(layer, `${defaultUrl}?valid=${encodeURIComponent(iso)}`);
+        if (isRt) {
+            // Realtime mode: only refresh every 5 minutes
+            const minute = current.getUTCMinutes();
+            if (minute % 5 === 0) {
+                doRealtimeRefresh(true);
             }
-        };
-        
-        // Subscribe to updates
-        subscribeToCurrentTime(doRefreshIfNeeded);
-        // Also do an initial call
-        doRefreshIfNeeded();
-    } catch {
-        // If state helpers not available, skip auto refresh
-    }
+        } else {
+            // Archive mode: always refresh with valid=ISO parameter
+            const iso = current.toISOString();
+            refreshPointObservations(layer, `${defaultUrl}?valid=${encodeURIComponent(iso)}`);
+        }
+    };
+    
+    // Subscribe to updates
+    subscribeToCurrentTime(doRefreshIfNeeded);
+    // Special Handler for realtime switch
+    subscribeToRealTime(doRealtimeRefresh);
+    // Also do an initial call
+    doRefreshIfNeeded();
 
     return layer;
 }
