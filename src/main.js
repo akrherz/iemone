@@ -5,6 +5,7 @@ import { createSPSLayer } from './spsLayer';
 import { setupWarningsTable } from './warningsTable';
 import { createRadarTMSLayer } from './radarTMSLayer';
 import { initializeURLHandler } from './urlHandler';
+import { applyLocalStorageFallbackToState } from './initialState';
 import { setupWarningsModal } from './warningsModal';
 import { setupTimeInputControl } from './timeInputControl';
 import { setupLayerControls } from './layerControls';
@@ -16,6 +17,8 @@ import { createRwisLayer } from './pointObservations';
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeURLHandler();
+    // One-time bootstrap: apply localStorage values that don't conflict with URL
+    applyLocalStorageFallbackToState();
 
     // Create shared popup element for layers that need it
     const sharedPopup = document.createElement('div');
