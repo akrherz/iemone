@@ -25,7 +25,7 @@
   "dependencies": {
     "eslint": "^9.35.0",
     "eslint-js": "github:eslint/js",
-    "globals": "^16.3.0",
+    "globals": "^16.4.0",
     "iemjs": "^0.0.7",
     "ol": "^10.6.1",
     "strftime": "^0.10.3"
