@@ -153,7 +153,6 @@ export function getWebcamLayers() {
 export function initializeWebcam(map) {
     // TODO: liveshot button for webcams that support it
 
-
     idotdashcamGeoJsonLayer = new VectorLayer({
         // @ts-ignore
         title: 'Iowa DOT Truck Dashcams (2014-)',
@@ -163,7 +162,8 @@ export function initializeWebcam(map) {
         }),
         style: (feature) => {
             if (currentCameraFeature &&
-                currentCameraFeature.get("cid") === feature.get("cid")) {
+                currentCameraFeature.get("cid") === feature.get("cid") &&
+                currentCameraFeature.get("utc_valid") === feature.get("utc_valid")) {
                 currentCameraFeature = feature;
                 return [trackaplowStyle2];
             }
@@ -244,17 +244,20 @@ export function initializeWebcam(map) {
             }
         });
         
-        // Remove styling
+        // Remove styling from previous selection (check both cid and timestamp for unique identity)
         if (currentCameraFeature) {
-            currentCameraFeature.setStyle(feature.getStyle());
+            currentCameraFeature.setStyle(null); // Reset to default style
         }
-        // Update
+        // Update to the clicked feature (this will be unique by cid + timestamp)
         currentCameraFeature = feature;
         // Set new styling - angle property is optional for webcams
         if (feature.get("angle") !== undefined) {
             cameraStyle2.getImage()?.setRotation(
                 parseInt(feature.get('angle'), 10) / 180.0 * 3.14);
             feature.setStyle(cameraStyle2);
+        } else {
+            // For dashcam features, apply the highlighted style
+            feature.setStyle(trackaplowStyle2);
         }
         
         // Check if this is an RWIS camera with multiple views
@@ -267,11 +270,12 @@ export function initializeWebcam(map) {
         }
         
         // Create window with appropriate configuration
+        const timestamp = feature.get('utc_valid') || feature.get('valid');
         const windowOptions = {
             cid: feature.get('cid'),
             title: feature.get('name') || feature.get('cid') || 'Camera View',
-            description: `Camera ID: ${feature.get('cid')}`, 
-            timestamp: feature.get('utc_valid') || feature.get('valid'),
+            description: `Camera ID: ${feature.get('cid')}${timestamp ? ` - ${new Date(timestamp).toLocaleString()}` : ''}`, 
+            timestamp: timestamp,
             layer: sourceLayer,
         };
         
