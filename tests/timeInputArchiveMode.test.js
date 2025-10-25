@@ -11,12 +11,12 @@ jest.mock('flatpickr', () => {
     const instance = {
       setDate: jest.fn((date) => {
         if (element && date) {
-          const d = new Date(date);
-          const year = d.getFullYear();
-          const month = String(d.getMonth() + 1).padStart(2, '0');
-          const day = String(d.getDate()).padStart(2, '0');
-          let hours = d.getHours();
-          const minutes = String(d.getMinutes()).padStart(2, '0');
+          const dt = new Date(date);
+          const year = dt.getFullYear();
+          const month = String(dt.getMonth() + 1).padStart(2, '0');
+          const day = String(dt.getDate()).padStart(2, '0');
+          let hours = dt.getHours();
+          const minutes = String(dt.getMinutes()).padStart(2, '0');
           const ampm = hours >= 12 ? 'PM' : 'AM';
           hours = hours % 12 || 12;
           element.value = `${year}-${month}-${day} ${hours}:${minutes} ${ampm}`;
@@ -24,7 +24,7 @@ jest.mock('flatpickr', () => {
       }),
       set: jest.fn(),
       close: jest.fn(),
-      config: config,
+      config,
       calendarContainer: mockCalendarContainer
     };
     
