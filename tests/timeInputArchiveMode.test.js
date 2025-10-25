@@ -3,6 +3,46 @@ import * as radarModule from '../src/radarTMSLayer';
 import * as stateModule from '../src/state';
 import * as brandingModule from '../src/brandingOverlay';
 
+// Mock flatpickr module
+jest.mock('flatpickr', () => {
+  return jest.fn((element, config) => {
+    const mockCalendarContainer = { tagName: 'DIV', appendChild: jest.fn() };
+    
+    const instance = {
+      setDate: jest.fn((date) => {
+        if (element && date) {
+          const dt = new Date(date);
+          const year = dt.getFullYear();
+          const month = String(dt.getMonth() + 1).padStart(2, '0');
+          const day = String(dt.getDate()).padStart(2, '0');
+          let hours = dt.getHours();
+          const minutes = String(dt.getMinutes()).padStart(2, '0');
+          const ampm = hours >= 12 ? 'PM' : 'AM';
+          hours = hours % 12 || 12;
+          element.value = `${year}-${month}-${day} ${hours}:${minutes} ${ampm}`;
+        }
+      }),
+      set: jest.fn(),
+      close: jest.fn(),
+      config,
+      calendarContainer: mockCalendarContainer
+    };
+    
+    if (config?.defaultDate) {
+      instance.setDate(config.defaultDate);
+    }
+    
+    if (config?.onReady) {
+      config.onReady([], element.value, instance);
+    }
+    
+    element._flatpickr = instance;
+    element._config = config;
+    
+    return instance;
+  });
+});
+
 // Mock the modules
 jest.mock('../src/radarTMSLayer', () => ({
   updateRadarTMSLayer: jest.fn(),
@@ -20,11 +60,12 @@ describe('Time Input Control - Archive Mode', () => {
     document.body.innerHTML = `
       <input type="radio" id="archive-mode" name="mode" value="archive">
       <input type="radio" id="realtime-mode" name="mode" value="realtime">
-      <input type="datetime-local" id="current-time" />
+      <input type="text" id="current-time" />
       <button id="time-step-backward"></button>
       <button id="time-step-forward"></button>
       <button id="time-play-pause"></button>
       <div id="branding-overlay"></div>
+      <div id="animation-progress"></div>
     `;
     
     // Mock state functions
@@ -44,25 +85,23 @@ describe('Time Input Control - Archive Mode', () => {
 
   test('time input is initialized with current state value', () => {
     const input = document.getElementById('current-time');
-    // Should be initialized with the mocked current time
     expect(input.value).toBeTruthy();
-    expect(input.value).toContain('2025-01-01T'); // Just check date part, time varies by timezone
+    expect(input.value).toContain('2025-01-01');
   });
 
   test('time input change updates state and saves', () => {
     const input = document.getElementById('current-time');
-    input.value = '2025-01-01T15:30';
+    const flatpickr = input._flatpickr;
+    const config = input._config;
     
-    const event = new Event('change');
-    input.dispatchEvent(event);
+    const newDate = new Date('2025-01-01T15:30');
+    if (config?.onChange) {
+      config.onChange([newDate], input.value, flatpickr);
+    }
     
-    // Should call setCurrentTime with the new time
-    expect(stateModule.setCurrentTime).toHaveBeenCalledWith(new Date('2025-01-01T15:30'));
-    
-    // Should save state
+    expect(stateModule.setCurrentTime).toHaveBeenCalledWith(newDate);
     expect(stateModule.saveState).toHaveBeenCalled();
     
-    // Should NOT directly update radar or branding - let state subscribers handle it
     expect(radarModule.updateRadarTMSLayer).not.toHaveBeenCalled();
     expect(brandingModule.updateBrandingOverlay).not.toHaveBeenCalled();
   });
@@ -82,27 +121,26 @@ describe('Time Input Control - Archive Mode', () => {
   test('input does not update while user is typing', () => {
     const input = document.getElementById('current-time');
     
-    // Initial value should be set from current state
     expect(input.value).toBeTruthy();
     const initialValue = input.value;
     
-    // Simulate user starting to type
-    input.focus();
-    input.dispatchEvent(new Event('focus'));
+    const flatpickr = input._flatpickr;
+    const config = input._config;
     
-    // Mock a state change that would normally update the input
+    if (config?.onOpen) {
+      config.onOpen([], input.value, flatpickr);
+    }
+    
     const callback = stateModule.subscribeToCurrentTime.mock.calls[0][0];
     const testTime = new Date('2025-01-01T20:00:00Z');
     callback(testTime);
     
-    // Input should not have been updated while focused
-    expect(input.value).toBe(initialValue); // Should remain unchanged
+    expect(input.value).toBe(initialValue);
     
-    // When user finishes editing
-    input.blur();
-    input.dispatchEvent(new Event('blur'));
+    if (config?.onClose) {
+      config.onClose([], input.value, flatpickr);
+    }
     
-    // Now it should update (check that value was actually set, exact format may vary by timezone)
     expect(input.value).toBeTruthy();
     expect(input.value).toContain('2025-01-01');
   });

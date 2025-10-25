@@ -1,19 +1,20 @@
 import { updateRadarTMSLayer, resetRadarTMSLayer } from './radarTMSLayer';
 import { saveState, getCurrentTime, setCurrentTime, setIsRealTime, getIsRealTime, subscribeToCurrentTime, subscribeToRealTime } from './state';
 import { updateAnimationBranding, updateBrandingOverlay } from './brandingOverlay';
-import strftime from 'strftime';
 import { requireElement, requireButtonElement, requireInputElement } from 'iemjs/domUtils';
+import flatpickr from 'flatpickr';
 
 let timeInput = null;
 let animationInterval = null;
+let flatpickrInstance = null;
 
-function handleTimeInputChange(event) {
-    if (!timeInput) {
+function handleTimeInputChange(selectedDates) {
+    if (!timeInput || selectedDates.length === 0) {
         return;
     }
-    const newTime = new Date(event.target.value);
-    if (isNaN(newTime.getTime()) || !event.target.value) {
-        return; // Invalid or incomplete date, ignore
+    const newTime = selectedDates[0];
+    if (isNaN(newTime.getTime())) {
+        return;
     }
     setCurrentTime(newTime);
     saveState();
@@ -73,8 +74,39 @@ function toggleAnimation() {
 export function setupTimeInputControl() {
     timeInput = requireElement('current-time');
     
-    // Set initial time input value from current state
-    updateTimeInput(getCurrentTime());
+    flatpickrInstance = flatpickr(timeInput, {
+        enableTime: true,
+        dateFormat: "Y-m-d h:i K",
+        time_24hr: false,
+        defaultDate: getCurrentTime(),
+        minDate: "1993-01-01",
+        maxDate: new Date(),
+        onChange: handleTimeInputChange,
+        onOpen: () => {
+            timeInput.dataset.userEditing = 'true';
+        },
+        onClose: () => {
+            delete timeInput.dataset.userEditing;
+        },
+        onReady: (selectedDates, dateStr, instance) => {
+            const calendarContainer = instance.calendarContainer;
+            const closeButton = document.createElement('button');
+            closeButton.type = 'button';
+            closeButton.className = 'flatpickr-close-button';
+            closeButton.textContent = 'Close';
+            closeButton.addEventListener('click', () => {
+                instance.close();
+            });
+            calendarContainer.appendChild(closeButton);
+        }
+    });
+    
+    // Update maxDate every 5 minutes for kiosk mode (catches midnight rollover)
+    setInterval(() => {
+        if (flatpickrInstance) {
+            flatpickrInstance.set('maxDate', new Date());
+        }
+    }, 5 * 60 * 1000); // Every 5 minutes
     
     subscribeToCurrentTime((currentTime) => {
         updateTimeInput(currentTime);
@@ -82,22 +114,8 @@ export function setupTimeInputControl() {
     
     subscribeToRealTime((isRealtime) => {
         updateUI(isRealtime);
-        // Update the radio buttons
         requireInputElement('realtime-mode').checked = isRealtime;
         requireInputElement('archive-mode').checked = !isRealtime;
-    });
-
-    timeInput.addEventListener('change', handleTimeInputChange);
-    
-    // Prevent the input from being updated while user is typing
-    timeInput.addEventListener('focus', () => {
-        timeInput.dataset.userEditing = 'true';
-    });
-    
-    timeInput.addEventListener('blur', () => {
-        delete timeInput.dataset.userEditing;
-        // Update to current state when user finishes editing
-        updateTimeInput(getCurrentTime());
     });
 
     const timeStepBackwardButton = requireButtonElement('time-step-backward');
@@ -135,9 +153,8 @@ export function setupTimeInputControl() {
 }
 
 function updateTimeInput(time) {
-    if (timeInput && document.activeElement !== timeInput && !timeInput.dataset.userEditing) {
-        // Only update if user is not currently typing in the input
-        timeInput.value = strftime('%Y-%m-%dT%H:%M', time);
+    if (flatpickrInstance && !timeInput.dataset.userEditing) {
+        flatpickrInstance.setDate(time, false);
     }
 }
 
