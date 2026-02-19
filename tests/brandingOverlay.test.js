@@ -53,8 +53,8 @@ describe('BrandingOverlay', () => {
             const radarTime = new Date('2025-01-15T10:32:00.000Z');
             updateAnimationBranding(radarTime);
 
-            expect(mockElement.dataset.mode).toBe('archive');
-            expect(mockElement.textContent).toContain('IEM1: Archive (Animating)');
+            expect(mockElement.dataset.mode).toBe('realtime');
+            expect(mockElement.textContent).toContain('IEM1: Realtime (Animating)');
             expect(mockElement.textContent).toContain('RADAR:');
             expect(mockElement.textContent).toContain('Warnings:');
         });
