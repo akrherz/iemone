@@ -11,9 +11,11 @@ export function updateAnimationBranding(radarTime) {
     const localRadarTime = strftime(FMT, rectifyToFiveMinutes(radarTime));
     const currentTime = getCurrentTime();
     const localWarningsTime = strftime(FMT, currentTime);
+    const isRealTime = getIsRealTime();
     
-    brandingOverlay.dataset.mode = 'archive';
-    brandingOverlay.textContent = `IEM1: Archive (Animating) RADAR: ${localRadarTime} Warnings: ${localWarningsTime}`;
+    brandingOverlay.dataset.mode = isRealTime ? 'realtime' : 'archive';
+    const modeLabel = isRealTime ? 'Realtime' : 'Archive';
+    brandingOverlay.textContent = `IEM1: ${modeLabel} (Animating) RADAR: ${localRadarTime} Warnings: ${localWarningsTime}`;
 }
 
 export function updateBrandingOverlay() {
