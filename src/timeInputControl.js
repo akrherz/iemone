@@ -45,20 +45,21 @@ function toggleAnimation() {
         return;
     }
 
-    const currentTime = getCurrentTime();
-    let now = new Date(currentTime);
-    now.setMinutes(currentTime.getMinutes() - 55);
+    const animationBaseTime = getCurrentTime();
     let step = 0;
     const totalSteps = 12;
 
     animationInterval = setInterval(() => {
         if (step >= totalSteps) {
             step = 0;
-            now = new Date(currentTime.getTime() - 55 * 60 * 1000);
         }
-        updateRadarTMSLayer(now);
-        updateAnimationBranding(now);
-        now.setMinutes(now.getMinutes() + 5);
+
+        const baseTime = getIsRealTime() ? getCurrentTime() : animationBaseTime;
+        const frameTime = new Date(baseTime.getTime() - 55 * 60 * 1000 + step * 5 * 60 * 1000);
+
+        updateRadarTMSLayer(frameTime);
+        updateAnimationBranding(frameTime);
+
         step++;
         const progressPercentage = (step / totalSteps) * 100;
         if (progressBar instanceof HTMLElement) {
