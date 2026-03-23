@@ -31,7 +31,8 @@ module.exports = [
             'no-eval': 'error',
             'no-var': 'error',
             'prefer-const': 'error',
-            semi: 'error',
+            "semi": 'error',
+            "no-useless-assignment": 'error',
         },
     },
 ];
