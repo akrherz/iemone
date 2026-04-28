@@ -5,7 +5,7 @@ import VectorSource from 'ol/source/Vector';
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
 import { fromLonLat } from 'ol/proj';
-import { Style, Text, Fill, Stroke, Circle as CircleStyle } from 'ol/style';
+import { Style, Text, Fill, Stroke } from 'ol/style';
 import { formatTimestampToUTC } from './utils';
 import {
     getCurrentTime,
@@ -22,6 +22,7 @@ const TILE_SERVICE =
     'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/';
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const ANIMATION_FRAMES = 12;
+const PREFERRED_PRODUCTS = ['TZL', 'N0B', 'N0Q', 'N0R'];
 
 let ridgeTileLayer = null;
 let ridgeStationsLayer = null;
@@ -30,6 +31,7 @@ let stationsSource = null;
 /** @type {Array<{ts: string}>} */
 let currentScans = [];
 let currentScanTs = null;
+let currentScansDate = null;
 let refreshInterval = null;
 
 const callbacks = {
@@ -66,7 +68,7 @@ export function buildTileUrl(radar, product, ts) {
 }
 
 export function findClosestScan(scans, targetTime) {
-    if (!scans || scans.length === 0) return null;
+    if (!scans || scans.length === 0) {return null;}
     let closest = scans[0];
     let minDiff = Math.abs(new Date(scans[0].ts).getTime() - targetTime.getTime());
     for (const scan of scans) {
@@ -84,17 +86,13 @@ function getStationStyle(selectedRadarId) {
         const radarId = feature.get('radarId');
         const isSelected = radarId === selectedRadarId;
         return new Style({
-            image: new CircleStyle({
-                radius: isSelected ? 7 : 5,
-                fill: new Fill({ color: isSelected ? '#ffff00' : '#ffffff' }),
-                stroke: new Stroke({ color: '#000000', width: 1 }),
-            }),
             text: new Text({
                 text: radarId,
-                offsetY: -14,
-                fill: new Fill({ color: '#ffffff' }),
-                stroke: new Stroke({ color: '#000000', width: 2 }),
-                font: '11px Arial, sans-serif',
+                font: `${isSelected ? 'bold ' : ''}12px Arial, sans-serif`,
+                fill: new Fill({ color: isSelected ? '#ffff00' : '#ffffff' }),
+                backgroundFill: new Fill({ color: isSelected ? '#1a5c1a' : '#2e8b2e' }),
+                backgroundStroke: new Stroke({ color: '#0a3a0a', width: 1 }),
+                padding: [2, 4, 2, 4],
             }),
         });
     };
@@ -103,6 +101,7 @@ function getStationStyle(selectedRadarId) {
 async function fetchAvailableRadars(time) {
     const iso = time.toISOString().slice(0, 19) + 'Z';
     const res = await fetch(`${RADAR_API}?operation=available&start=${iso}`);
+    if (!res.ok) {throw new Error(`HTTP ${res.status}`);}
     return res.json();
 }
 
@@ -111,6 +110,7 @@ async function fetchProducts(radar, time) {
     const res = await fetch(
         `${RADAR_API2}?radar=${radar}&start=${iso}&operation=products`
     );
+    if (!res.ok) {throw new Error(`HTTP ${res.status}`);}
     return res.json();
 }
 
@@ -124,23 +124,24 @@ async function fetchScans(radar, product, time) {
     const res = await fetch(
         `${RADAR_API2}?operation=list&product=${product}&radar=${radar}&start=${startStr}&end=${endStr}`
     );
+    if (!res.ok) {throw new Error(`HTTP ${res.status}`);}
     return res.json();
 }
 
 function refreshStationStyle() {
-    if (!stationsSource) return;
+    if (!stationsSource) {return;}
     const selectedRadar = getState(StateKeys.RIDGE_RADAR);
     const styleFn = getStationStyle(selectedRadar);
-    stationsSource.getFeatures().forEach((f) => f.setStyle(styleFn(f)));
+    stationsSource.getFeatures().forEach((feature) => feature.setStyle(styleFn(feature)));
 }
 
 function applyClosestScanToLayer() {
     const radar = getState(StateKeys.RIDGE_RADAR);
     const product = getState(StateKeys.RIDGE_PRODUCT);
-    if (!radar || !product || currentScans.length === 0) return;
+    if (!radar || !product || currentScans.length === 0) {return;}
 
     const scan = findClosestScan(currentScans, getCurrentTime());
-    if (!scan) return;
+    if (!scan) {return;}
 
     currentScanTs = scan.ts;
     ridgeTileLayer.getSource().setUrl(buildTileUrl(radar, product, scan.ts));
@@ -151,24 +152,25 @@ function applyClosestScanToLayer() {
 export async function loadAvailableRadars() {
     try {
         const data = await fetchAvailableRadars(getCurrentTime());
-        if (!data.radars || !stationsSource) return;
+        if (!data.radars || !stationsSource) {return;}
 
         const selectedRadar = getState(StateKeys.RIDGE_RADAR);
         const styleFn = getStationStyle(selectedRadar);
-        const features = data.radars.map((r) => {
+        const radars = data.radars.filter((radar) => radar.id !== 'USCOMP');
+        const features = radars.map((radar) => {
             const feature = new Feature({
-                geometry: new Point(fromLonLat([r.lon, r.lat])),
-                radarId: r.id,
-                radarName: r.name,
+                geometry: new Point(fromLonLat([radar.lon, radar.lat])),
+                radarId: radar.id,
+                radarName: radar.name,
             });
-            feature.setId(r.id);
+            feature.setId(radar.id);
             feature.setStyle(styleFn(feature));
             return feature;
         });
 
         stationsSource.clear();
         stationsSource.addFeatures(features);
-        fireCallbacks('radarsLoaded', { radars: data.radars });
+        fireCallbacks('radarsLoaded', { radars });
     } catch (err) {
         console.error('Failed to load available RADARs:', err);
     }
@@ -186,9 +188,12 @@ export async function selectRadar(radarId) {
 
             const currentProduct = getState(StateKeys.RIDGE_PRODUCT);
             const productExists =
-                currentProduct && data.products.some((p) => p.id === currentProduct);
+                currentProduct && data.products.some((prod) => prod.id === currentProduct);
             if (!productExists && data.products.length > 0) {
-                await selectProduct(data.products[0].id);
+                const preferred = PREFERRED_PRODUCTS.find((id) =>
+                    data.products.some((prod) => prod.id === id)
+                );
+                await selectProduct(preferred ?? data.products[0].id);
             } else if (productExists) {
                 await loadScansAndUpdate();
             }
@@ -201,11 +206,12 @@ export async function selectRadar(radarId) {
 async function loadScansAndUpdate() {
     const radar = getState(StateKeys.RIDGE_RADAR);
     const product = getState(StateKeys.RIDGE_PRODUCT);
-    if (!radar || !product) return;
+    if (!radar || !product) {return;}
 
     try {
         const data = await fetchScans(radar, product, getCurrentTime());
         currentScans = data.scans || [];
+        currentScansDate = getCurrentTime().toISOString().slice(0, 10);
         applyClosestScanToLayer();
     } catch (err) {
         console.error('Failed to load RADAR scans:', err);
@@ -220,17 +226,18 @@ export async function selectProduct(product) {
 export function updateRidgeForTime(time) {
     const radar = getState(StateKeys.RIDGE_RADAR);
     const product = getState(StateKeys.RIDGE_PRODUCT);
-    if (!radar || !product || currentScans.length === 0) return;
+    if (!radar || !product || currentScans.length === 0) {return;}
 
     const scan = findClosestScan(currentScans, time);
-    if (!scan) return;
+    if (!scan) {return;}
 
     currentScanTs = scan.ts;
     ridgeTileLayer.getSource().setUrl(buildTileUrl(radar, product, scan.ts));
+    fireCallbacks('scansUpdated', { scans: currentScans, currentScan: scan.ts });
 }
 
 export function getRidgeScansForAnimation(count = ANIMATION_FRAMES) {
-    if (currentScans.length === 0) return [];
+    if (currentScans.length === 0) {return [];}
     return currentScans.slice(-count);
 }
 
@@ -239,7 +246,7 @@ export function getCurrentRidgeScanTime() {
 }
 
 export function isRidgeActive() {
-    if (!ridgeTileLayer) return false;
+    if (!ridgeTileLayer) {return false;}
     return (
         ridgeTileLayer.getVisible() &&
         !!getState(StateKeys.RIDGE_RADAR) &&
@@ -288,15 +295,16 @@ export function createRidgeRadarLayers(map) {
     ridgeStationsLayer = new VectorLayer({
         source: stationsSource,
         visible: false,
+        zIndex: 1002,
     });
 
     map.addLayer(ridgeTileLayer);
     map.addLayer(ridgeStationsLayer);
 
     map.on('singleclick', (event) => {
-        if (!ridgeStationsLayer.getVisible()) return;
-        const feature = map.forEachFeatureAtPixel(event.pixel, (f) => {
-            if (f.get('radarId') !== undefined) return f;
+        if (!ridgeStationsLayer.getVisible()) {return;}
+        const feature = map.forEachFeatureAtPixel(event.pixel, (feat) => {
+            if (feat.get('radarId') !== undefined) {return feat;}
             return undefined;
         });
         if (feature) {
@@ -305,11 +313,14 @@ export function createRidgeRadarLayers(map) {
     });
 
     subscribeToCurrentTime((newTime) => {
-        if (!isRidgeActive()) return;
+        if (!isRidgeActive()) {return;}
         if (getIsRealTime()) {
-            loadScansAndUpdate();
-        } else {
             if (currentScans.length > 0) {
+                applyClosestScanToLayer();
+            }
+        } else {
+            const newDateStr = newTime.toISOString().slice(0, 10);
+            if (currentScans.length > 0 && newDateStr === currentScansDate) {
                 updateRidgeForTime(newTime);
             } else {
                 loadScansAndUpdate();
@@ -325,7 +336,7 @@ export function createRidgeRadarLayers(map) {
 }
 
 export function setRidgeEnabled(enabled) {
-    if (!ridgeStationsLayer || !ridgeTileLayer) return;
+    if (!ridgeStationsLayer || !ridgeTileLayer) {return;}
     ridgeStationsLayer.setVisible(enabled);
 
     if (enabled) {

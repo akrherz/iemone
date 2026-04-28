@@ -10,6 +10,7 @@ import {
     onProductsLoaded,
     onScansUpdated,
     onRadarsLoaded,
+    getRidgeTileLayer,
 } from './ridgeRadarLayer.js';
 
 function saveLayerState() {
@@ -202,15 +203,26 @@ function setupRidgeControls() {
     const ridgeRadarSelect = requireElement('ridge-radar-select');
     const ridgeProductSelect = requireElement('ridge-product-select');
     const ridgeScanInfo = requireElement('ridge-scan-info');
+    const ridgeOpacitySlider = requireInputElement('ridge-opacity-slider');
 
     const isEnabled = getLayerVisibility('ridge');
     ridgeLayerToggle.checked = isEnabled;
     ridgeOptions.style.display = isEnabled ? '' : 'none';
     setRidgeEnabled(isEnabled);
 
+    ridgeOpacitySlider.addEventListener('input', (event) => {
+        const target = event.target;
+        if (target instanceof HTMLInputElement) {
+            getRidgeTileLayer()?.setOpacity(parseFloat(target.value));
+        }
+        saveState();
+    });
+
+    getRidgeTileLayer()?.setOpacity(parseFloat(ridgeOpacitySlider.value));
+
     ridgeLayerToggle.addEventListener('change', (event) => {
         const target = event.target;
-        if (!(target instanceof HTMLInputElement)) return;
+        if (!(target instanceof HTMLInputElement)) {return;}
         const checked = target.checked;
         ridgeOptions.style.display = checked ? '' : 'none';
         setLayerVisibility('ridge', checked);
@@ -220,7 +232,7 @@ function setupRidgeControls() {
 
     ridgeRadarSelect.addEventListener('change', (event) => {
         const target = event.target;
-        if (!(target instanceof HTMLSelectElement) || !target.value) return;
+        if (!(target instanceof HTMLSelectElement) || !target.value) {return;}
         setState(StateKeys.RIDGE_RADAR, target.value);
         selectRadar(target.value);
         saveState();
@@ -228,19 +240,19 @@ function setupRidgeControls() {
 
     ridgeProductSelect.addEventListener('change', (event) => {
         const target = event.target;
-        if (!(target instanceof HTMLSelectElement) || !target.value) return;
+        if (!(target instanceof HTMLSelectElement) || !target.value) {return;}
         setState(StateKeys.RIDGE_PRODUCT, target.value);
         selectProduct(target.value);
         saveState();
     });
 
     onRadarsLoaded(({ radars }) => {
-        if (!(ridgeRadarSelect instanceof HTMLSelectElement)) return;
+        if (!(ridgeRadarSelect instanceof HTMLSelectElement)) {return;}
         ridgeRadarSelect.innerHTML = '<option value="">-- select a RADAR --</option>';
-        radars.forEach((r) => {
+        radars.forEach((radar) => {
             const opt = document.createElement('option');
-            opt.value = r.id;
-            opt.textContent = `${r.id} – ${r.name}`;
+            opt.value = radar.id;
+            opt.textContent = `${radar.id} – ${radar.name}`;
             ridgeRadarSelect.appendChild(opt);
         });
         const currentRadar = getState(StateKeys.RIDGE_RADAR);
@@ -256,12 +268,12 @@ function setupRidgeControls() {
     });
 
     onProductsLoaded(({ products }) => {
-        if (!(ridgeProductSelect instanceof HTMLSelectElement)) return;
+        if (!(ridgeProductSelect instanceof HTMLSelectElement)) {return;}
         ridgeProductSelect.innerHTML = '';
-        products.forEach((p) => {
+        products.forEach((prod) => {
             const opt = document.createElement('option');
-            opt.value = p.id;
-            opt.textContent = `${p.id} – ${p.name}`;
+            opt.value = prod.id;
+            opt.textContent = `${prod.id} – ${prod.name}`;
             ridgeProductSelect.appendChild(opt);
         });
         ridgeProductSelect.disabled = false;
@@ -273,8 +285,8 @@ function setupRidgeControls() {
 
     onScansUpdated(({ currentScan }) => {
         if (currentScan) {
-            const d = new Date(currentScan);
-            ridgeScanInfo.textContent = `Scan: ${d.toUTCString().replace(':00 GMT', ' UTC')}`;
+            const scanDate = new Date(currentScan);
+            ridgeScanInfo.textContent = `Scan: ${scanDate.toUTCString().replace(':00 GMT', ' UTC')}`;
         }
         const currentProduct = getState(StateKeys.RIDGE_PRODUCT);
         if (currentProduct && ridgeProductSelect instanceof HTMLSelectElement) {
@@ -282,13 +294,4 @@ function setupRidgeControls() {
         }
     });
 
-    if (isEnabled) {
-        onProductsLoaded(({ products }) => {
-            if (!(ridgeRadarSelect instanceof HTMLSelectElement)) return;
-            const currentRadar = getState(StateKeys.RIDGE_RADAR);
-            if (currentRadar && ridgeRadarSelect.querySelector(`option[value="${currentRadar}"]`)) {
-                ridgeRadarSelect.value = currentRadar;
-            }
-        });
-    }
 }
