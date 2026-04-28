@@ -58,12 +58,10 @@ function toggleAnimation() {
             step = 0;
         }
 
-        let frameTime;
+        const baseTime = getIsRealTime() ? getCurrentTime() : animationBaseTime;
+        let frameTime = new Date(baseTime.getTime() - 55 * 60 * 1000 + step * 5 * 60 * 1000);
         if (useRidgeScans) {
             frameTime = new Date(ridgeScans[step].ts);
-        } else {
-            const baseTime = getIsRealTime() ? getCurrentTime() : animationBaseTime;
-            frameTime = new Date(baseTime.getTime() - 55 * 60 * 1000 + step * 5 * 60 * 1000);
         }
 
         updateRadarTMSLayer(frameTime);
