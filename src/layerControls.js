@@ -2,12 +2,21 @@ import { saveState, getLayerVisibility, setLayerVisibility, getState, setState, 
 import { requireElement, requireInputElement } from 'iemjs/domUtils';
 import { getWebcamLayers } from './webcamManager.js';
 import { setLabelAttribute, getLabelAttribute } from './pointObservations.js';
+import {
+    setRidgeEnabled,
+    selectRadar,
+    selectProduct,
+    onRadarStationClick,
+    onProductsLoaded,
+    onScansUpdated,
+    onRadarsLoaded,
+} from './ridgeRadarLayer.js';
 
 function saveLayerState() {
     saveState();
 }
 
-export function setupLayerControls(map, radarTMSLayer, spsLayer, rwisLayer) {
+export function setupLayerControls(map, radarTMSLayer, spsLayer, rwisLayer, ridgeLayers) {
     const layersToggle = requireElement('layers-toggle');
     const layerControl = requireElement('layer-control');
     const closeLayersButton = requireElement('close-layers');
@@ -178,6 +187,108 @@ export function setupLayerControls(map, radarTMSLayer, spsLayer, rwisLayer) {
                 setLayerVisibility('rwis', target.checked);
             }
             saveLayerState();
+        });
+    }
+
+    // Setup RIDGE Single RADAR layer controls
+    if (ridgeLayers) {
+        setupRidgeControls();
+    }
+}
+
+function setupRidgeControls() {
+    const ridgeLayerToggle = requireInputElement('toggle-ridge-layer');
+    const ridgeOptions = requireElement('ridge-options');
+    const ridgeRadarSelect = requireElement('ridge-radar-select');
+    const ridgeProductSelect = requireElement('ridge-product-select');
+    const ridgeScanInfo = requireElement('ridge-scan-info');
+
+    const isEnabled = getLayerVisibility('ridge');
+    ridgeLayerToggle.checked = isEnabled;
+    ridgeOptions.style.display = isEnabled ? '' : 'none';
+    setRidgeEnabled(isEnabled);
+
+    ridgeLayerToggle.addEventListener('change', (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLInputElement)) return;
+        const checked = target.checked;
+        ridgeOptions.style.display = checked ? '' : 'none';
+        setLayerVisibility('ridge', checked);
+        setRidgeEnabled(checked);
+        saveState();
+    });
+
+    ridgeRadarSelect.addEventListener('change', (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLSelectElement) || !target.value) return;
+        setState(StateKeys.RIDGE_RADAR, target.value);
+        selectRadar(target.value);
+        saveState();
+    });
+
+    ridgeProductSelect.addEventListener('change', (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLSelectElement) || !target.value) return;
+        setState(StateKeys.RIDGE_PRODUCT, target.value);
+        selectProduct(target.value);
+        saveState();
+    });
+
+    onRadarsLoaded(({ radars }) => {
+        if (!(ridgeRadarSelect instanceof HTMLSelectElement)) return;
+        ridgeRadarSelect.innerHTML = '<option value="">-- select a RADAR --</option>';
+        radars.forEach((r) => {
+            const opt = document.createElement('option');
+            opt.value = r.id;
+            opt.textContent = `${r.id} – ${r.name}`;
+            ridgeRadarSelect.appendChild(opt);
+        });
+        const currentRadar = getState(StateKeys.RIDGE_RADAR);
+        if (currentRadar) {
+            ridgeRadarSelect.value = currentRadar;
+        }
+    });
+
+    onRadarStationClick(({ radarId }) => {
+        if (ridgeRadarSelect instanceof HTMLSelectElement) {
+            ridgeRadarSelect.value = radarId;
+        }
+    });
+
+    onProductsLoaded(({ products }) => {
+        if (!(ridgeProductSelect instanceof HTMLSelectElement)) return;
+        ridgeProductSelect.innerHTML = '';
+        products.forEach((p) => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = `${p.id} – ${p.name}`;
+            ridgeProductSelect.appendChild(opt);
+        });
+        ridgeProductSelect.disabled = false;
+        const currentProduct = getState(StateKeys.RIDGE_PRODUCT);
+        if (currentProduct) {
+            ridgeProductSelect.value = currentProduct;
+        }
+    });
+
+    onScansUpdated(({ currentScan }) => {
+        if (currentScan) {
+            const d = new Date(currentScan);
+            ridgeScanInfo.textContent = `Scan: ${d.toUTCString().replace(':00 GMT', ' UTC')}`;
+        }
+        const currentProduct = getState(StateKeys.RIDGE_PRODUCT);
+        if (currentProduct && ridgeProductSelect instanceof HTMLSelectElement) {
+            ridgeProductSelect.value = currentProduct;
+        }
+    });
+
+    if (isEnabled) {
+        onProductsLoaded(({ products }) => {
+            if (!(ridgeRadarSelect instanceof HTMLSelectElement)) return;
+            const currentRadar = getState(StateKeys.RIDGE_RADAR);
+            if (currentRadar && ridgeRadarSelect.querySelector(`option[value="${currentRadar}"]`)) {
+                ridgeRadarSelect.value = currentRadar;
+            }
         });
     }
 }

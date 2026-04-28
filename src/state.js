@@ -8,7 +8,9 @@ export const StateKeys = {
     ACTIVE_PHENOMENA: 'activePhenomena',
     LAYER_VISIBILITY: 'layerVisibility',
     RWIS_LABEL: 'rwisobsLabel',
-    BASE_LAYER: 'baseLayer'
+    BASE_LAYER: 'baseLayer',
+    RIDGE_RADAR: 'ridgeRadar',
+    RIDGE_PRODUCT: 'ridgeProduct',
 };
 
 // Add initial active phenomena set
@@ -25,7 +27,8 @@ const defaultLayerVisibility = {
     pointobs: true,
     webcam: true,
     dashcam: false,
-    rwis: false
+    rwis: false,
+    ridge: false,
 };
 
 const sstate = loadState();
@@ -38,7 +41,9 @@ const state = {
     [StateKeys.ACTIVE_PHENOMENA]: sstate?.activePhenomena ?? new Set(defaultActivePhenomena),
     [StateKeys.LAYER_VISIBILITY]: sstate?.layerVisibility ?? { ...defaultLayerVisibility },
     [StateKeys.BASE_LAYER]: sstate?.baseLayer ?? 'esri-hybrid',
-    [StateKeys.RWIS_LABEL]: sstate?.rwisobsLabel ?? 'tfs0'
+    [StateKeys.RWIS_LABEL]: sstate?.rwisobsLabel ?? 'tfs0',
+    [StateKeys.RIDGE_RADAR]: sstate?.ridgeRadar ?? null,
+    [StateKeys.RIDGE_PRODUCT]: sstate?.ridgeProduct ?? null,
 };
 const subscribers = {};
 
@@ -189,7 +194,9 @@ export function saveState() {
         currentTime: (currentTime && !isRealtime) ? currentTime.toISOString() : null,
         layerVisibility,
     baseLayer,
-    rwisobsLabel: getState(StateKeys.RWIS_LABEL)
+    rwisobsLabel: getState(StateKeys.RWIS_LABEL),
+    ridgeRadar: getState(StateKeys.RIDGE_RADAR),
+    ridgeProduct: getState(StateKeys.RIDGE_PRODUCT),
     };
     localStorage.setItem(STATE_KEY, JSON.stringify(localstate));
 }
@@ -230,6 +237,10 @@ export function loadState() {
 
             // Ensure rwis label exists
             lstate.rwisobsLabel = lstate.rwisobsLabel ?? 'tfs0';
+
+            // Ensure ridge selections default to null
+            lstate.ridgeRadar = lstate.ridgeRadar ?? null;
+            lstate.ridgeProduct = lstate.ridgeProduct ?? null;
 
             // If isRealtime, then set the currentTime to now
             if (lstate.isRealtime) {

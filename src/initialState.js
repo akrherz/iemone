@@ -37,7 +37,7 @@ export function applyLocalStorageFallbackToState() {
         }
 
         // layer visibility
-        const layerParams = ['radar', 'warnings', 'sps', 'webcam', 'dashcam', 'rwis', 'rwisobs'];
+        const layerParams = ['radar', 'warnings', 'sps', 'webcam', 'dashcam', 'rwis', 'rwisobs', 'ridge'];
         layerParams.forEach(layer => {
             if (params[layer] === undefined && lstate.layerVisibility && lstate.layerVisibility[layer] !== undefined) {
                 setLayerVisibility(layer, !!lstate.layerVisibility[layer]);
@@ -49,6 +49,16 @@ export function applyLocalStorageFallbackToState() {
         if (!params.rwisobs_label && lstate.rwisobsLabel) {
             setState(StateKeys.RWIS_LABEL, lstate.rwisobsLabel);
             applied.push('rwisobs_label');
+        }
+
+        // RIDGE RADAR and product: apply only if URL didn't provide them
+        if (!params.ridge_radar && lstate.ridgeRadar) {
+            setState(StateKeys.RIDGE_RADAR, lstate.ridgeRadar);
+            applied.push('ridge_radar');
+        }
+        if (!params.ridge_product && lstate.ridgeProduct) {
+            setState(StateKeys.RIDGE_PRODUCT, lstate.ridgeProduct);
+            applied.push('ridge_product');
         }
 
         // If any applied, we rely on state subscribers to update the URL accordingly.

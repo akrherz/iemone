@@ -78,6 +78,25 @@
         </div>
         <div class="layer-section">
             <label class="layer-toggle">
+                <input type="checkbox" id="toggle-ridge-layer">
+                <span>NWS Single RADAR (RIDGE)</span>
+            </label>
+            <div class="layer-options" id="ridge-options" style="display:none">
+                <label>RADAR Site:
+                    <select id="ridge-radar-select" style="width:100%">
+                        <option value="">-- loading --</option>
+                    </select>
+                </label>
+                <label style="margin-top:6px">Product:
+                    <select id="ridge-product-select" style="width:100%" disabled>
+                        <option value="">-- select a RADAR --</option>
+                    </select>
+                </label>
+                <div id="ridge-scan-info" style="margin-top:6px;font-size:12px;color:#555"></div>
+            </div>
+        </div>
+        <div class="layer-section">
+            <label class="layer-toggle">
                 <input type="checkbox" id="toggle-warnings-layer" checked>
                 <span>Warnings & Advisories</span>
             </label>
@@ -230,6 +249,9 @@
             <li><strong>warnings=1_or_0</strong>: Show or hide the weather warnings.</li>
             <li><strong>radar=1_or_0</strong>: Show or hide the radar imagery.</li>
             <li><strong>sps=1_or_0</strong>: Show or hide the special weather statements.</li>
+            <li><strong>ridge=1_or_0</strong>: Show or hide the NWS Single RADAR (RIDGE) layer.</li>
+            <li><strong>ridge_radar=ID</strong>: Set the selected RIDGE RADAR site (e.g. DMX).</li>
+            <li><strong>ridge_product=ID</strong>: Set the selected RIDGE product (e.g. N0B).</li>
         </ul>
         <h3>Features</h3>
         <ul>
