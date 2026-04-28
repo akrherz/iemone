@@ -4,6 +4,7 @@ import { createWarningsLayer } from './warningsLayer';
 import { createSPSLayer } from './spsLayer';
 import { setupWarningsTable } from './warningsTable';
 import { createRadarTMSLayer } from './radarTMSLayer';
+import { createRidgeRadarLayers } from './ridgeRadarLayer';
 import { initializeURLHandler } from './urlHandler';
 import { applyLocalStorageFallbackToState } from './initialState';
 import { setupWarningsModal } from './warningsModal';
@@ -28,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const map = initializeMap();
     const radarTMSLayer = createRadarTMSLayer(map);
+    const ridgeLayers = createRidgeRadarLayers(map);
     // Create RWIS observations layer (clustered)
     const rwisLayer = createRwisLayer(map, { defaultUrl: 'https://mesonet.agron.iastate.edu/api/1/rwis.geojson', cluster: true });
     const tableElement = requireElement('warnings-table');
@@ -39,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupTimeInputControl();
     setupWarningsTable(tableElement, warningsLayer);
     setupWarningsModal();
-    setupLayerControls(map, radarTMSLayer, spsLayer, rwisLayer);
+    setupLayerControls(map, radarTMSLayer, spsLayer, rwisLayer, ridgeLayers);
     setupHelpModal();
     initBrandingOverlay();
 });

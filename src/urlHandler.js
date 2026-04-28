@@ -38,7 +38,7 @@ export function initializeURLHandler() {
     }
 
     // Handle layer visibility from URL (overrides localStorage)
-    const layerParams = ['radar', 'warnings', 'sps', 'webcam', 'dashcam', 'rwis', 'rwisobs'];
+    const layerParams = ['radar', 'warnings', 'sps', 'webcam', 'dashcam', 'rwis', 'rwisobs', 'ridge'];
     layerParams.forEach(layer => {
         if (params[layer] !== undefined) {
             const visible = params[layer] === '1' || params[layer] === 'true';
@@ -49,6 +49,14 @@ export function initializeURLHandler() {
     // Handle RWIS label attribute from URL
     if (params.rwisobs_label) {
         setState(StateKeys.RWIS_LABEL, params.rwisobs_label);
+    }
+
+    // Handle RIDGE RADAR and product from URL
+    if (params.ridge_radar) {
+        setState(StateKeys.RIDGE_RADAR, params.ridge_radar);
+    }
+    if (params.ridge_product) {
+        setState(StateKeys.RIDGE_PRODUCT, params.ridge_product);
     }
 
     // (Initial localStorage merge is handled in a dedicated bootstrap step.)
@@ -96,6 +104,22 @@ export function initializeURLHandler() {
         }
     });
 
+    // Persist RIDGE RADAR and product in URL
+    subscribeToState(StateKeys.RIDGE_RADAR, (radar) => {
+        if (radar) {
+            updateQueryParams('ridge_radar', radar);
+        } else {
+            updateQueryParams('ridge_radar', null);
+        }
+    });
+    subscribeToState(StateKeys.RIDGE_PRODUCT, (product) => {
+        if (product) {
+            updateQueryParams('ridge_product', product);
+        } else {
+            updateQueryParams('ridge_product', null);
+        }
+    });
+
     // Subscribe to layer visibility changes
     subscribeToState(StateKeys.LAYER_VISIBILITY, (layerVisibility) => {
         layerParams.forEach(layer => {
@@ -107,7 +131,7 @@ export function initializeURLHandler() {
             // Only add to URL if different from default
             const defaultVisibility = {
                 radar: true, warnings: true, sps: true,
-                webcam: true, dashcam: false, rwis: false, rwisobs: false
+                webcam: true, dashcam: false, rwis: false, rwisobs: false, ridge: false,
             };
             
             if (isVisible !== defaultVisibility[layer]) {

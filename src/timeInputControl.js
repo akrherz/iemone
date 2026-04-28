@@ -1,4 +1,5 @@
 import { updateRadarTMSLayer, resetRadarTMSLayer } from './radarTMSLayer';
+import { updateRidgeForTime, getRidgeScansForAnimation, isRidgeActive } from './ridgeRadarLayer';
 import { saveState, getCurrentTime, setCurrentTime, setIsRealTime, getIsRealTime, subscribeToCurrentTime, subscribeToRealTime } from './state';
 import { updateAnimationBranding, updateBrandingOverlay } from './brandingOverlay';
 import { requireElement, requireButtonElement, requireInputElement } from 'iemjs/domUtils';
@@ -45,9 +46,12 @@ function toggleAnimation() {
         return;
     }
 
+    const ridgeScans = isRidgeActive() ? getRidgeScansForAnimation(12) : [];
+    const useRidgeScans = ridgeScans.length > 0;
+
     const animationBaseTime = getCurrentTime();
     let step = 0;
-    const totalSteps = 12;
+    const totalSteps = useRidgeScans ? ridgeScans.length : 12;
 
     animationInterval = setInterval(() => {
         if (step >= totalSteps) {
@@ -55,9 +59,15 @@ function toggleAnimation() {
         }
 
         const baseTime = getIsRealTime() ? getCurrentTime() : animationBaseTime;
-        const frameTime = new Date(baseTime.getTime() - 55 * 60 * 1000 + step * 5 * 60 * 1000);
+        let frameTime = new Date(baseTime.getTime() - 55 * 60 * 1000 + step * 5 * 60 * 1000);
+        if (useRidgeScans) {
+            frameTime = new Date(ridgeScans[step].ts);
+        }
 
         updateRadarTMSLayer(frameTime);
+        if (isRidgeActive()) {
+            updateRidgeForTime(frameTime);
+        }
         updateAnimationBranding(frameTime);
 
         step++;
