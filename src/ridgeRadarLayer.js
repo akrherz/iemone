@@ -59,13 +59,13 @@ export function onRadarsLoaded(cb) {
     callbacks.radarsLoaded.push(cb);
 }
 
-function buildTileUrl(radar, product, ts) {
+export function buildTileUrl(radar, product, ts) {
     const date = new Date(ts);
     const formatted = formatTimestampToUTC(date);
     return `${TILE_SERVICE}ridge::${radar}-${product}-${formatted}/{z}/{x}/{y}.png`;
 }
 
-function findClosestScan(scans, targetTime) {
+export function findClosestScan(scans, targetTime) {
     if (!scans || scans.length === 0) return null;
     let closest = scans[0];
     let minDiff = Math.abs(new Date(scans[0].ts).getTime() - targetTime.getTime());

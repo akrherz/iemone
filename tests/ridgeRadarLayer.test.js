@@ -9,6 +9,8 @@ import {
     onProductsLoaded,
     onScansUpdated,
     onRadarsLoaded,
+    buildTileUrl,
+    findClosestScan,
 } from '../src/ridgeRadarLayer';
 
 describe('ridgeRadarLayer', () => {
@@ -66,5 +68,60 @@ describe('ridgeRadarLayer', () => {
     it('should register onRadarsLoaded callbacks', () => {
         expect(typeof onRadarsLoaded).toBe('function');
         expect(() => onRadarsLoaded(() => {})).not.toThrow();
+    });
+
+    describe('buildTileUrl', () => {
+        it('builds the correct tile URL for a given radar, product, and timestamp', () => {
+            const url = buildTileUrl('DMX', 'N0B', '2026-04-28T12:00Z');
+            expect(url).toBe(
+                'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/ridge::DMX-N0B-202604281200/{z}/{x}/{y}.png'
+            );
+        });
+
+        it('zero-pads month, day, hours, and minutes', () => {
+            const url = buildTileUrl('ABC', 'N0Q', '2025-01-02T03:04Z');
+            expect(url).toContain('ridge::ABC-N0Q-202501020304/');
+        });
+    });
+
+    describe('findClosestScan', () => {
+        it('returns null for an empty scan list', () => {
+            expect(findClosestScan([], new Date('2026-04-28T12:00Z'))).toBeNull();
+        });
+
+        it('returns null for a null scan list', () => {
+            expect(findClosestScan(null, new Date('2026-04-28T12:00Z'))).toBeNull();
+        });
+
+        it('returns the single scan when only one exists', () => {
+            const scans = [{ ts: '2026-04-28T12:00Z' }];
+            expect(findClosestScan(scans, new Date('2026-04-28T11:00Z'))).toEqual(scans[0]);
+        });
+
+        it('returns the scan closest to the target time', () => {
+            const scans = [
+                { ts: '2026-04-28T12:00Z' },
+                { ts: '2026-04-28T12:05Z' },
+                { ts: '2026-04-28T12:10Z' },
+            ];
+            const target = new Date('2026-04-28T12:06Z');
+            expect(findClosestScan(scans, target)).toEqual({ ts: '2026-04-28T12:05Z' });
+        });
+
+        it('returns the earliest scan when target is before all scans', () => {
+            const scans = [
+                { ts: '2026-04-28T12:00Z' },
+                { ts: '2026-04-28T12:05Z' },
+            ];
+            expect(findClosestScan(scans, new Date('2026-04-28T11:00Z'))).toEqual(scans[0]);
+        });
+
+        it('returns the latest scan when target is after all scans', () => {
+            const scans = [
+                { ts: '2026-04-28T12:00Z' },
+                { ts: '2026-04-28T12:05Z' },
+            ];
+            expect(findClosestScan(scans, new Date('2026-04-28T13:00Z'))).toEqual(scans[1]);
+        });
     });
 });
