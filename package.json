@@ -12,18 +12,18 @@
     "lint:fix": "eslint . --ext .js --fix"
   },
   "devDependencies": {
-    "@babel/core": "^7.29.7",
-    "@babel/preset-env": "^7.29.7",
+    "@babel/core": "^8.0.1",
+    "@babel/preset-env": "^8.0.2",
     "@eslint/js": "^10.0.1",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "babel-jest": "^30.4.1",
-    "eslint": "^10.4.1",
-    "globals": "^17.6.0",
+    "eslint": "^10.6.0",
+    "globals": "^17.7.0",
     "iemjs": "^0.0.7",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
-    "vite": "^8.0.16"
+    "vite": "^8.1.2"
   },
   "dependencies": {
     "flatpickr": "^4.6.13",
