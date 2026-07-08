@@ -1,7 +1,6 @@
 import { setupTimeInputControl } from '../src/timeInputControl';
-import * as radarModule from '../src/radarTMSLayer';
 import * as stateModule from '../src/state';
-import * as brandingModule from '../src/brandingOverlay';
+import * as timelineModule from '../src/timelineController';
 
 // Mock flatpickr module
 jest.mock('flatpickr', () => {
@@ -43,18 +42,18 @@ jest.mock('flatpickr', () => {
   });
 });
 
-// Mock the modules
-jest.mock('../src/radarTMSLayer', () => ({
-  updateRadarTMSLayer: jest.fn(),
-  resetRadarTMSLayer: jest.fn()
-}));
-
-jest.mock('../src/brandingOverlay', () => ({
-  updateBrandingOverlay: jest.fn(),
-  updateAnimationBranding: jest.fn()
+jest.mock('../src/timelineController', () => ({
+  setArchiveMode: jest.fn(),
+  setArchiveTime: jest.fn(),
+  setRealtimeMode: jest.fn(),
+  stepArchiveTime: jest.fn(),
+  subscribeToAnimationState: jest.fn(),
+  toggleAnimation: jest.fn()
 }));
 
 describe('Time Input Control - Archive Mode', () => {
+  let animationStateCallback;
+
   beforeEach(() => {
     // Set up DOM
     document.body.innerHTML = `
@@ -76,6 +75,10 @@ describe('Time Input Control - Archive Mode', () => {
     jest.spyOn(stateModule, 'setCurrentTime').mockImplementation(() => {});
     jest.spyOn(stateModule, 'setIsRealTime').mockImplementation(() => {});
     jest.spyOn(stateModule, 'saveState').mockImplementation(() => {});
+
+    timelineModule.subscribeToAnimationState.mockImplementation((callback) => {
+      animationStateCallback = callback;
+    });
     
     // Clear mocks
     jest.clearAllMocks();
@@ -99,11 +102,7 @@ describe('Time Input Control - Archive Mode', () => {
       config.onChange([newDate], input.value, flatpickr);
     }
     
-    expect(stateModule.setCurrentTime).toHaveBeenCalledWith(newDate);
-    expect(stateModule.saveState).toHaveBeenCalled();
-    
-    expect(radarModule.updateRadarTMSLayer).not.toHaveBeenCalled();
-    expect(brandingModule.updateBrandingOverlay).not.toHaveBeenCalled();
+    expect(timelineModule.setArchiveTime).toHaveBeenCalledWith(newDate);
   });
 
   test('invalid time input is ignored', () => {
@@ -112,10 +111,8 @@ describe('Time Input Control - Archive Mode', () => {
     
     const event = new Event('change');
     input.dispatchEvent(event);
-    
-    // Should not call any update functions for invalid date
-    expect(stateModule.setCurrentTime).not.toHaveBeenCalled();
-    expect(stateModule.saveState).not.toHaveBeenCalled();
+
+    expect(timelineModule.setArchiveTime).not.toHaveBeenCalled();
   });
 
   test('input does not update while user is typing', () => {
@@ -151,25 +148,54 @@ describe('Time Input Control - Archive Mode', () => {
     
     const event = new Event('change');
     input.dispatchEvent(event);
-    
-    // Should not call any update functions for empty input
-    expect(stateModule.setCurrentTime).not.toHaveBeenCalled();
-    expect(stateModule.saveState).not.toHaveBeenCalled();
+
+    expect(timelineModule.setArchiveTime).not.toHaveBeenCalled();
   });
 
   test('step time buttons update state and save', () => {
     const stepForwardButton = document.getElementById('time-step-forward');
-    
+
     stepForwardButton.click();
-    
-    // Should call setCurrentTime
-    expect(stateModule.setCurrentTime).toHaveBeenCalled();
-    
-    // Should save state
-    expect(stateModule.saveState).toHaveBeenCalled();
-    
-    // Should NOT directly update components - let state subscribers handle it
-    expect(radarModule.updateRadarTMSLayer).not.toHaveBeenCalled();
-    expect(brandingModule.updateBrandingOverlay).not.toHaveBeenCalled();
+
+    expect(timelineModule.stepArchiveTime).toHaveBeenCalledWith(5);
+  });
+
+  test('clicking realtime when archive was loaded enters realtime', () => {
+    const realtimeMode = document.getElementById('realtime-mode');
+
+    realtimeMode.checked = true;
+    realtimeMode.dispatchEvent(new Event('change'));
+
+    expect(timelineModule.setRealtimeMode).toHaveBeenCalledTimes(1);
+  });
+
+  test('clicking archive radio calls archive transition', () => {
+    const archiveMode = document.getElementById('archive-mode');
+
+    archiveMode.checked = true;
+    archiveMode.dispatchEvent(new Event('change'));
+
+    expect(timelineModule.setArchiveMode).toHaveBeenCalledTimes(1);
+  });
+
+  test('play/pause button delegates to timeline controller', () => {
+    const playPauseButton = document.getElementById('time-play-pause');
+
+    playPauseButton.click();
+
+    expect(timelineModule.toggleAnimation).toHaveBeenCalledTimes(1);
+  });
+
+  test('animation subscriber updates button icon and progress', () => {
+    const playPauseButton = document.getElementById('time-play-pause');
+    const progressBar = document.querySelector('#animation-progress .progress');
+
+    animationStateCallback({ isAnimating: true, progress: 50 });
+    expect(playPauseButton.textContent).toBe('⏸︎');
+    expect(progressBar.style.width).toBe('50%');
+
+    animationStateCallback({ isAnimating: false, progress: 90 });
+    expect(playPauseButton.textContent).toBe('⏵︎');
+    expect(progressBar.style.width).toBe('90%');
   });
 });

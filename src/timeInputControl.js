@@ -1,13 +1,18 @@
-import { updateRadarTMSLayer, resetRadarTMSLayer } from './radarTMSLayer';
-import { updateRidgeForTime, getRidgeScansForAnimation, isRidgeActive } from './ridgeRadarLayer';
-import { saveState, getCurrentTime, setCurrentTime, setIsRealTime, getIsRealTime, subscribeToCurrentTime, subscribeToRealTime } from './state';
-import { updateAnimationBranding, updateBrandingOverlay } from './brandingOverlay';
+import { getCurrentTime, getIsRealTime, subscribeToCurrentTime, subscribeToRealTime } from './state';
+import {
+    setArchiveMode,
+    setArchiveTime,
+    setRealtimeMode,
+    stepArchiveTime,
+    subscribeToAnimationState,
+    toggleAnimation,
+} from './timelineController';
 import { requireElement, requireButtonElement, requireInputElement } from 'iemjs/domUtils';
 import flatpickr from 'flatpickr';
 
 let timeInput = null;
-let animationInterval = null;
 let flatpickrInstance = null;
+let progressBar = null;
 
 function handleTimeInputChange(selectedDates) {
     if (!timeInput || selectedDates.length === 0) {
@@ -17,73 +22,19 @@ function handleTimeInputChange(selectedDates) {
     if (isNaN(newTime.getTime())) {
         return;
     }
-    setCurrentTime(newTime);
-    saveState();
-}
-
-function toggleAnimation() {
-    let progressBar = document.querySelector('#animation-progress .progress');
-    const timePlayPauseButton = requireElement('time-play-pause');
-
-    if (!progressBar) {
-        const progressContainer = requireElement('animation-progress');
-        progressBar = document.createElement('div');
-        progressBar.className = 'progress';
-        progressContainer.appendChild(progressBar);
-    }
-
-    if (animationInterval) {
-        clearInterval(animationInterval);
-        animationInterval = null;
-        if (timePlayPauseButton) {
-            timePlayPauseButton.textContent = '⏵︎';
-        }
-        if (progressBar instanceof HTMLElement) {
-            progressBar.style.width = '0%';
-        }
-        resetRadarTMSLayer(); // Reset radar to match app state
-        updateBrandingOverlay(); // Reset branding to normal state
-        return;
-    }
-
-    const ridgeScans = isRidgeActive() ? getRidgeScansForAnimation(12) : [];
-    const useRidgeScans = ridgeScans.length > 0;
-
-    const animationBaseTime = getCurrentTime();
-    let step = 0;
-    const totalSteps = useRidgeScans ? ridgeScans.length : 12;
-
-    animationInterval = setInterval(() => {
-        if (step >= totalSteps) {
-            step = 0;
-        }
-
-        const baseTime = getIsRealTime() ? getCurrentTime() : animationBaseTime;
-        let frameTime = new Date(baseTime.getTime() - 55 * 60 * 1000 + step * 5 * 60 * 1000);
-        if (useRidgeScans) {
-            frameTime = new Date(ridgeScans[step].ts);
-        }
-
-        updateRadarTMSLayer(frameTime);
-        if (isRidgeActive()) {
-            updateRidgeForTime(frameTime);
-        }
-        updateAnimationBranding(frameTime);
-
-        step++;
-        const progressPercentage = (step / totalSteps) * 100;
-        if (progressBar instanceof HTMLElement) {
-            progressBar.style.width = `${progressPercentage}%`;
-        }
-    }, 1000);
-
-    if (timePlayPauseButton) {
-        timePlayPauseButton.textContent = '⏸︎';
-    }
+    setArchiveTime(newTime);
 }
 
 export function setupTimeInputControl() {
     timeInput = requireElement('current-time');
+    const progressContainer = requireElement('animation-progress');
+    progressBar = progressContainer.querySelector('.progress');
+    if (!(progressBar instanceof HTMLElement)) {
+        const createdProgress = document.createElement('div');
+        createdProgress.className = 'progress';
+        progressContainer.appendChild(createdProgress);
+        progressBar = createdProgress;
+    }
     
     flatpickrInstance = flatpickr(timeInput, {
         enableTime: true,
@@ -140,41 +91,37 @@ export function setupTimeInputControl() {
 
     realtimeMode.checked = isRealtime;
     archiveMode.checked = !isRealtime;
+    updateUI(isRealtime);
+
+    subscribeToAnimationState(({ isAnimating, progress }) => {
+        timePlayPauseButton.textContent = isAnimating ? '⏸︎' : '⏵︎';
+        if (progressBar instanceof HTMLElement) {
+            progressBar.style.width = `${progress}%`;
+        }
+    });
 
     realtimeMode.addEventListener('change', (evt) => {
         const target = evt.target;
-        if (target instanceof HTMLInputElement) {
-            setIsRealTime(target.checked);
+        if (target instanceof HTMLInputElement && target.checked) {
+            setRealtimeMode();
         }
-        saveState();
     });
     archiveMode.addEventListener('change', (evt) => {
         const target = evt.target;
-        if (target instanceof HTMLInputElement) {
-            setIsRealTime(!target.checked);
+        if (target instanceof HTMLInputElement && target.checked) {
+            setArchiveMode();
         }
-        saveState();
     });
 
-    timeStepBackwardButton.addEventListener('click', () => stepTime(-5));
-    timeStepForwardButton.addEventListener('click', () => stepTime(5));
+    timeStepBackwardButton.addEventListener('click', () => stepArchiveTime(-5));
+    timeStepForwardButton.addEventListener('click', () => stepArchiveTime(5));
     timePlayPauseButton.addEventListener('click', toggleAnimation);
-
-
 }
 
 function updateTimeInput(time) {
     if (flatpickrInstance && !timeInput.dataset.userEditing) {
         flatpickrInstance.setDate(time, false);
     }
-}
-
-function stepTime(minutes) {
-    const currentTime = getCurrentTime();
-    const newTime = new Date(currentTime);
-    newTime.setMinutes(currentTime.getMinutes() + minutes);
-    setCurrentTime(newTime);
-    saveState();
 }
 
 function updateUI(isRealtime) {
