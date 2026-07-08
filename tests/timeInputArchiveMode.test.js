@@ -153,10 +153,13 @@ describe('Time Input Control - Archive Mode', () => {
   });
 
   test('step time buttons update state and save', () => {
+    const stepBackwardButton = document.getElementById('time-step-backward');
     const stepForwardButton = document.getElementById('time-step-forward');
 
+    stepBackwardButton.click();
     stepForwardButton.click();
 
+    expect(timelineModule.stepArchiveTime).toHaveBeenCalledWith(-5);
     expect(timelineModule.stepArchiveTime).toHaveBeenCalledWith(5);
   });
 

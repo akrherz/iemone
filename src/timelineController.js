@@ -44,7 +44,14 @@ export function subscribeToAnimationState(callback) {
     if (typeof callback === 'function') {
         animationSubscribers.push(callback);
         callback({ isAnimating: isAnimating(), progress: getAnimationProgress() });
+        return () => {
+            const idx = animationSubscribers.indexOf(callback);
+            if (idx !== -1) {
+                animationSubscribers.splice(idx, 1);
+            }
+        };
     }
+    return () => {};
 }
 
 function resetAnimationState() {
